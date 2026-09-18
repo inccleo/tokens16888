@@ -106,6 +106,48 @@ ssh -i ~/.ssh/tokens16888.pem ubuntu@54.151.248.175
 
 `inccleo/tokens16888` 是独立仓库（官方源码拷贝），**不要改、不要当成** 原来的 `inccleo/sub2api`。
 
+## 3.1 自己改代码并部署
+
+用 GitHub Actions 自动构建，不要在本机 `docker build`。
+
+官方 `sub2api/.github/workflows/release.yml` 现在不会跑：GitHub 只认仓库根目录的 `.github/workflows`。本仓库用根目录的 `Build image`：推 `main` 且改了 `sub2api/`，就会构建并推到 GHCR。
+
+镜像：
+
+```text
+ghcr.io/inccleo/tokens16888:latest
+```
+
+改代码流程：
+
+1. 在 `sub2api/` 里改（后端 `backend/`，前端 `frontend/`）
+2. 提交并推到 `main`
+3. 等 Actions 的 **Build image** 成功
+4. 服务器拉新镜像重启：
+
+```bash
+ssh -i ~/.ssh/tokens16888.pem ubuntu@54.151.248.175
+cd /opt/tokens16888
+sudo docker compose pull
+sudo docker compose up -d
+```
+
+第一次改成自己的镜像时，先把 compose 里的镜像从官方换成 GHCR：
+
+```bash
+cd /opt/tokens16888
+sudo sed -i 's|image:.*sub2api.*|image: ghcr.io/inccleo/tokens16888:latest|' docker-compose.yml
+grep image docker-compose.yml
+```
+
+如果 `docker pull` 提示 private package，把 GitHub Package `tokens16888` 设成 Public，或在服务器登录 GHCR：
+
+```bash
+echo YOUR_GITHUB_TOKEN | sudo docker login ghcr.io -u inccleo --password-stdin
+```
+
+不要再拉 `weishaw/sub2api:latest`，那会覆盖你的改动。数据在 `/opt/tokens16888/data`、`postgres_data`、`redis_data`，重建应用容器不会清库。
+
 ## 4. 应用部署
 
 已用官方 `Wei-Shaw/sub2api` 的 Docker Compose 部署。应用只监听本机 `127.0.0.1:8080`，公网 **不要开 8080**。对外只走域名 `tokens16888.com`（Nginx 80 反代）。
@@ -130,10 +172,17 @@ cat /opt/tokens16888/.admin_password
 
 然后浏览器打开 http://tokens16888.com ，用上面的邮箱和密码登录。不要用 `IP:8080`。
 
-DNS 必须解析到这台机器的静态 IP `54.151.248.175`。如果走 Cloudflare 橙色云（代理），公网看到的是 Cloudflare IP，不是源站；源站证书也申请不了。需要二选一：
+Cloudflare 可以继续用橙色云（已代理）。`tokens16888.com` 只保留这一条 A 记录：
 
-- Cloudflare 记录改成 **仅 DNS**（灰色云），A 记录指向 `54.151.248.175`
-- 或者继续用 Cloudflare 代理，SSL 选 Flexible，源站仍走 HTTP 80
+| 名称 | 类型 | 内容 | 代理 |
+|---|---|---|---|
+| `tokens16888.com` | A | `54.151.248.175` | 已代理 |
+
+不要再挂 `54.149.79.189`、`34.216.117.25` 这些旧 IP，否则会轮询到停车页。
+
+源站 80/443 都已开。Cloudflare SSL/TLS 用 **Full** 即可（不要用 Full (strict)，源站现在是自签证书）。
+
+浏览器打开 `https://tokens16888.com`。如果还看到 521，硬刷新或清缓存后再试。
 
 常用命令（SSH 到服务器后）：
 
@@ -194,5 +243,6 @@ aws lightsail open-instance-public-ports \
 | SSH 超时 | 实例是否 `running`，22 端口是否开放 |
 | 命令打到错误区域 | `--region ap-southeast-1` |
 | 网页打不开 | 确认实例 `running`，80 端口已开，DNS 指向 `54.151.248.175`，`sudo docker compose ps` 三个容器都是 healthy |
-| 域名还是停车页 | Cloudflare 仍在代理或没指到这台源站。把 A 记录改成 `54.151.248.175`，代理关掉后再试 |
+| 域名还是停车页 | Cloudflare 同一域名挂了多条 A 记录，删掉旧 IP，只留 `54.151.248.175` |
+| `Error 521 Web server is down` | Cloudflare 在回源 443，源站当时没开 HTTPS。现在已开。SSL 用 Full，不要 Full (strict) |
 | `IP:8080` 打不开 | 正常。8080 只绑 `127.0.0.1`，公网已关闭 |
