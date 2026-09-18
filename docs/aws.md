@@ -83,7 +83,8 @@ output = json
 | 内网 IP | `172.26.8.104` |
 | SSH 私钥 | `~/.ssh/tokens16888.pem` |
 | Lightsail 密钥名 | `tokens16888` |
-| 开放端口 | 22 / 80 / 443 / 8080 |
+| 开放端口 | 22 / 80 / 443（**不要开 8080**） |
+| 域名 | `tokens16888.com` |
 
 登录：
 
@@ -95,23 +96,26 @@ ssh -i ~/.ssh/tokens16888.pem ubuntu@54.151.248.175
 
 ## 3. 代码仓库
 
-源码来自官方仓库，不是 `inccleo/sub2api`：
+源码来自官方仓库，不是 `inccleo/sub2api`。本仓库根目录只放运维文档，官方代码在 `sub2api/`。
 
 | 项 | 地址 |
 |---|---|
 | 官方源码 | https://github.com/Wei-Shaw/sub2api |
 | 本项目仓库 | https://github.com/inccleo/tokens16888 |
+| 本地源码目录 | `sub2api/` |
 
 `inccleo/tokens16888` 是独立仓库（官方源码拷贝），**不要改、不要当成** 原来的 `inccleo/sub2api`。
 
 ## 4. 应用部署
 
-已用官方 `Wei-Shaw/sub2api` 的 Docker Compose 部署在这台 Lightsail 上。
+已用官方 `Wei-Shaw/sub2api` 的 Docker Compose 部署。应用只监听本机 `127.0.0.1:8080`，公网 **不要开 8080**。对外只走域名 `tokens16888.com`（Nginx 80 反代）。
 
 | 项 | 值 |
 |---|---|
-| 访问地址 | http://54.151.248.175:8080 |
-| 健康检查 | http://54.151.248.175:8080/health |
+| 访问地址 | http://tokens16888.com |
+| 健康检查 | http://tokens16888.com/health |
+| Nginx | `/etc/nginx/sites-available/tokens16888.com` |
+| 应用绑定 | `127.0.0.1:8080`（不对外开放） |
 | 服务器目录 | `/opt/tokens16888` |
 | Compose 文件 | `/opt/tokens16888/docker-compose.yml`（来自官方 `deploy/docker-compose.local.yml`） |
 | 管理员邮箱 | `admin@tokens16888.local` |
@@ -124,7 +128,12 @@ ssh -i ~/.ssh/tokens16888.pem ubuntu@54.151.248.175
 cat /opt/tokens16888/.admin_password
 ```
 
-然后浏览器打开 http://54.151.248.175:8080 ，用上面的邮箱和密码登录。
+然后浏览器打开 http://tokens16888.com ，用上面的邮箱和密码登录。不要用 `IP:8080`。
+
+DNS 必须解析到这台机器的静态 IP `54.151.248.175`。如果走 Cloudflare 橙色云（代理），公网看到的是 Cloudflare IP，不是源站；源站证书也申请不了。需要二选一：
+
+- Cloudflare 记录改成 **仅 DNS**（灰色云），A 记录指向 `54.151.248.175`
+- 或者继续用 Cloudflare 代理，SSL 选 Flexible，源站仍走 HTTP 80
 
 常用命令（SSH 到服务器后）：
 
@@ -134,6 +143,7 @@ sudo docker compose ps
 sudo docker compose logs -f sub2api
 sudo docker compose restart
 sudo docker compose pull && sudo docker compose up -d
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ## 5. 常用操作
@@ -183,4 +193,6 @@ aws lightsail open-instance-public-ports \
 | SSH `Permission denied` | 用户是 `ubuntu`，私钥 `~/.ssh/tokens16888.pem`，权限 `400` |
 | SSH 超时 | 实例是否 `running`，22 端口是否开放 |
 | 命令打到错误区域 | `--region ap-southeast-1` |
-| 网页打不开 | 确认实例 `running`，8080 端口已开，`sudo docker compose ps` 三个容器都是 healthy |
+| 网页打不开 | 确认实例 `running`，80 端口已开，DNS 指向 `54.151.248.175`，`sudo docker compose ps` 三个容器都是 healthy |
+| 域名还是停车页 | Cloudflare 仍在代理或没指到这台源站。把 A 记录改成 `54.151.248.175`，代理关掉后再试 |
+| `IP:8080` 打不开 | 正常。8080 只绑 `127.0.0.1`，公网已关闭 |
