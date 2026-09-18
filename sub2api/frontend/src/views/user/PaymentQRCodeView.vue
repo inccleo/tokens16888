@@ -2,13 +2,19 @@
   <AppLayout>
     <div class="mx-auto flex max-w-md flex-col items-center space-y-6 py-8">
       <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-        {{ qrUrl ? scanTitle : t('payment.qr.payInNewWindow') }}
+        {{ (qrUrl || qrImageUrl) ? scanTitle : t('payment.qr.payInNewWindow') }}
       </h2>
-      <div v-if="qrUrl" class="rounded-2xl bg-white p-6 shadow-lg dark:bg-dark-800">
-        <canvas ref="qrCanvas" class="mx-auto"></canvas>
+      <div v-if="qrUrl || qrImageUrl" class="rounded-2xl bg-white p-6 shadow-lg dark:bg-dark-800">
+        <img
+          v-if="qrImageUrl"
+          :src="qrImageUrl"
+          alt=""
+          class="mx-auto h-64 w-64 object-contain"
+        />
+        <canvas v-else ref="qrCanvas" class="mx-auto"></canvas>
       </div>
       <!-- Scan prompt for QR code -->
-      <p v-if="qrUrl && !expired && scanHint" class="text-center text-sm text-gray-500 dark:text-gray-400">
+      <p v-if="(qrUrl || qrImageUrl) && !expired && scanHint" class="text-center text-sm text-gray-500 dark:text-gray-400">
         {{ scanHint }}
       </p>
       <div v-if="expired" class="text-center">
@@ -16,11 +22,11 @@
         <button class="btn btn-primary mt-4" @click="router.push('/purchase')">{{ t('payment.result.backToRecharge') }}</button>
       </div>
       <div v-else class="text-center">
-        <p class="text-sm text-gray-500 dark:text-gray-400">{{ qrUrl ? t('payment.qr.expiresIn') : t('payment.qr.payInNewWindowHint') }}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ (qrUrl || qrImageUrl) ? t('payment.qr.expiresIn') : t('payment.qr.payInNewWindowHint') }}</p>
         <p class="mt-1 text-2xl font-bold tabular-nums text-gray-900 dark:text-white">{{ countdownDisplay }}</p>
         <p class="mt-2 text-sm text-gray-400 dark:text-gray-500">{{ t('payment.qr.waitingPayment') }}</p>
       </div>
-      <a v-if="payUrl && !qrUrl && !expired" :href="payUrl" target="_blank" rel="noopener noreferrer"
+      <a v-if="payUrl && !qrUrl && !qrImageUrl && !expired" :href="payUrl" target="_blank" rel="noopener noreferrer"
         class="btn btn-primary w-full py-3">
         {{ t('payment.qr.openPayWindow') }}
       </a>
@@ -54,6 +60,7 @@ const appStore = useAppStore()
 
 const qrCanvas = ref<HTMLCanvasElement | null>(null)
 const qrUrl = ref('')
+const qrImageUrl = ref('')
 const payUrl = ref('')
 const orderId = ref(0)
 const remainingSeconds = ref(0)
@@ -93,7 +100,7 @@ function getLogoForType(): string | null {
 
 async function renderQR() {
   await nextTick()
-  if (!qrCanvas.value || !qrUrl.value) return
+  if (qrImageUrl.value || !qrCanvas.value || !qrUrl.value) return
 
   // Use medium error correction to support logo overlay while keeping QR code scannable
   const logoSrc = getLogoForType()
@@ -194,6 +201,7 @@ watch(qrUrl, () => renderQR())
 onMounted(() => {
   orderId.value = Number(route.query.order_id) || 0
   qrUrl.value = String(route.query.qr || '')
+  qrImageUrl.value = String(route.query.qr_img || '')
   payUrl.value = String(route.query.pay_url || '')
   paymentType.value = String(route.query.payment_type || '')
 

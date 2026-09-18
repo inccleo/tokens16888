@@ -175,6 +175,21 @@ describe('decidePaymentLaunch', () => {
     expect(decision.paymentState.qrCode).toBe('https://pay.example.com/qr/session')
   })
 
+  it('keeps QR flow when only a ready-made QR image is present', () => {
+    const decision = decidePaymentLaunch(createOrderResult({
+      pay_url: 'https://api.xunhupay.com/alipay/pay/index.html?id=1',
+      qr_code_img: 'https://api.xunhupay.com/qrcode/1.png',
+    }), {
+      visibleMethod: 'alipay',
+      orderType: 'balance',
+      isMobile: false,
+    })
+
+    expect(decision.kind).toBe('qr_waiting')
+    expect(decision.paymentState.qrCodeImg).toBe('https://api.xunhupay.com/qrcode/1.png')
+    expect(decision.paymentState.qrCode).toBe('')
+  })
+
   it('keeps QR flow on desktop when both pay_url and qr_code are present', () => {
     const decision = decidePaymentLaunch(createOrderResult({
       pay_url: 'https://pay.example.com/desktop/session',

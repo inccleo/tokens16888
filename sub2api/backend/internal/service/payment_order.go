@@ -296,6 +296,11 @@ func buildPaymentOrderProviderSnapshot(sel *payment.InstanceSelection, req Creat
 			snapshot["merchant_id"] = merchantID
 		}
 	}
+	if providerKey == payment.TypeXunHuPay {
+		if merchantAppID := strings.TrimSpace(sel.Config["appId"]); merchantAppID != "" {
+			snapshot["merchant_app_id"] = merchantAppID
+		}
+	}
 	if providerKey == payment.TypeStripe {
 		snapshot["currency"] = paymentProviderConfigCurrency(providerKey, sel.Config)
 	}
@@ -462,6 +467,7 @@ func (s *PaymentService) invokeProvider(ctx context.Context, order *dbent.Paymen
 		SetNillablePaymentTradeNo(psNilIfEmpty(pr.TradeNo)).
 		SetNillablePayURL(psNilIfEmpty(pr.PayURL)).
 		SetNillableQrCode(psNilIfEmpty(pr.QRCode)).
+		SetNillableQrCodeImg(psNilIfEmpty(pr.QRCodeImg)).
 		SetNillableProviderInstanceID(psNilIfEmpty(sel.InstanceID)).
 		SetNillableProviderKey(psNilIfEmpty(sel.ProviderKey)).
 		Save(ctx)
@@ -501,6 +507,7 @@ func sanitizeCreatePaymentResponseDetails(pr *payment.CreatePaymentResponse) {
 	pr.TradeNo = removePostgresTextNUL(pr.TradeNo)
 	pr.PayURL = removePostgresTextNUL(pr.PayURL)
 	pr.QRCode = removePostgresTextNUL(pr.QRCode)
+	pr.QRCodeImg = removePostgresTextNUL(pr.QRCodeImg)
 }
 
 func removePostgresTextNUL(value string) string {
@@ -741,6 +748,7 @@ func buildCreateOrderResponse(order *dbent.PaymentOrder, req CreateOrderRequest,
 		OutTradeNo:   order.OutTradeNo,
 		PayURL:       pr.PayURL,
 		QRCode:       pr.QRCode,
+		QRCodeImg:    pr.QRCodeImg,
 		ClientSecret: pr.ClientSecret,
 		IntentID:     pr.IntentID,
 		Currency:     pr.Currency,

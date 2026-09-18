@@ -118,6 +118,15 @@ describe('PaymentProviderDialog payment guide', () => {
     expect(wrapper.find('button[title="View payment guide"]').exists()).toBe(true)
   })
 
+  it('shows XunHuPay webhook callback path', async () => {
+    const wrapper = mountDialog()
+
+    ;(wrapper.vm as unknown as { reset: (key: string) => void }).reset('xunhupay')
+    await nextTick()
+
+    expect(wrapper.text()).toContain('/api/v1/payment/webhook/xunhupay')
+  })
+
   it('shows Airwallex webhook event and API version guidance with the webhook URL', async () => {
     const wrapper = mountDialog()
 

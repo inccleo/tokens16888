@@ -3,9 +3,15 @@
     <!-- QR Code + Polling State -->
     <div v-if="!success" class="flex flex-col items-center space-y-4">
       <!-- QR Code mode -->
-      <template v-if="qrUrl">
+      <template v-if="qrUrl || qrImageUrl">
         <div class="rounded-2xl bg-white p-4 shadow-sm dark:bg-dark-800">
-          <canvas ref="qrCanvas" class="mx-auto"></canvas>
+          <img
+            v-if="qrImageUrl"
+            :src="qrImageUrl"
+            alt=""
+            class="mx-auto h-[220px] w-[220px] object-contain"
+          />
+          <canvas v-else ref="qrCanvas" class="mx-auto"></canvas>
         </div>
         <p v-if="scanHint" class="text-center text-sm text-gray-500 dark:text-gray-400">
           {{ scanHint }}
@@ -26,7 +32,7 @@
         <p class="text-lg font-medium text-red-500">{{ t('payment.qr.expired') }}</p>
       </div>
       <div v-else class="text-center">
-        <p class="text-sm text-gray-500 dark:text-gray-400">{{ qrUrl ? t('payment.qr.expiresIn') : '' }}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ (qrUrl || qrImageUrl) ? t('payment.qr.expiresIn') : '' }}</p>
         <p class="mt-1 text-2xl font-bold tabular-nums text-gray-900 dark:text-white">{{ countdownDisplay }}</p>
         <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ t('payment.qr.waitingPayment') }}</p>
       </div>
@@ -90,6 +96,7 @@ const props = defineProps<{
   show: boolean
   orderId: number
   qrCode: string
+  qrCodeImg?: string
   expiresAt: string
   paymentType: string
   /** URL for reopening the payment popup window */
@@ -107,6 +114,7 @@ const appStore = useAppStore()
 
 const qrCanvas = ref<HTMLCanvasElement | null>(null)
 const qrUrl = ref('')
+const qrImageUrl = ref('')
 const remainingSeconds = ref(0)
 const expired = ref(false)
 const cancelling = ref(false)
@@ -127,7 +135,7 @@ const isWxpay = computed(() => isBuiltInWxpayMethod(props.paymentType))
 
 const dialogTitle = computed(() => {
   if (success.value) return t('payment.result.success')
-  if (!qrUrl.value) return t('payment.qr.payInNewWindow')
+  if (!qrUrl.value && !qrImageUrl.value) return t('payment.qr.payInNewWindow')
   if (isAlipay.value) return t('payment.qr.scanAlipay')
   if (isWxpay.value) return t('payment.qr.scanWxpay')
   return t('payment.qr.scanToPay')
@@ -164,7 +172,7 @@ function reopenPopup() {
 
 async function renderQR() {
   await nextTick()
-  if (!qrCanvas.value || !qrUrl.value) return
+  if (qrImageUrl.value || !qrCanvas.value || !qrUrl.value) return
   const logoSrc = getLogoForType()
   await QRCode.toCanvas(qrCanvas.value, qrUrl.value, {
     width: 220,
@@ -283,6 +291,7 @@ function init() {
   expired.value = false
   cancelling.value = false
   qrUrl.value = props.qrCode
+  qrImageUrl.value = props.qrCodeImg || ''
   verifyAttempts = 0
   lastVerifyAt = 0
 

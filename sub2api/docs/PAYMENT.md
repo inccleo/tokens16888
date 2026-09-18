@@ -22,11 +22,12 @@ Sub2API has a built-in payment system that enables user self-service top-up with
 | Provider | Payment Methods | Description |
 |----------|----------------|-------------|
 | **EasyPay** | Alipay, WeChat Pay | Third-party aggregation via EasyPay protocol |
+| **XunHuPay** | Alipay, WeChat Pay | XunHuPay personal collection channels; each APPID maps to one payment method |
 | **Alipay (Direct)** | Desktop QR code, mobile Alipay redirect | Direct integration with Alipay Open Platform, returning desktop QR codes and mobile WAP/app launch links |
 | **WeChat Pay (Direct)** | Native QR, H5, MP/JSAPI Pay | Direct integration with WeChat Pay APIv3 with environment-aware routing |
 | **Stripe** | Card, Alipay, WeChat Pay, Link, etc. | International payments, multi-currency support |
 
-> Alipay/WeChat Pay direct and EasyPay can both exist as backend provider instances, but the frontend always exposes only two visible buttons: `Alipay` and `WeChat Pay`. Admins choose exactly one source for each visible method: direct or EasyPay. Direct channels connect to payment APIs directly with lower fees; EasyPay aggregates through third-party platforms with easier setup.
+> Alipay/WeChat Pay direct, EasyPay, and XunHuPay can all exist as backend provider instances, but the frontend always exposes only two visible buttons: `Alipay` and `WeChat Pay`. Admins choose exactly one source for each visible method: direct, EasyPay, or XunHuPay. Direct channels connect to payment APIs directly with lower fees; EasyPay and XunHuPay aggregate through third-party platforms with easier setup.
 
 > **EasyPay Provider Recommendations**: Both options below are third-party aggregators compatible with the EasyPay protocol. Pick based on the funding channel and settlement currency you need:
 >
@@ -69,8 +70,8 @@ Configure the following in Admin Dashboard **Settings → Payment Settings**:
 
 The current payment UX keeps the frontend method list unified and does not expose provider brands directly:
 
-- **Alipay**: when enabled, this button must be routed to either `Alipay (Direct)` or `EasyPay Alipay`
-- **WeChat Pay**: when enabled, this button must be routed to either `WeChat Pay (Direct)` or `EasyPay WeChat`
+- **Alipay**: when enabled, this button must be routed to `Alipay (Direct)`, `EasyPay Alipay`, or `XunHuPay Alipay`
+- **WeChat Pay**: when enabled, this button must be routed to `WeChat Pay (Direct)`, `EasyPay WeChat`, or `XunHuPay WeChat`
 - Each visible method can route to only one source at a time
 - If a visible method is enabled without a selected source, the frontend will not expose that method
 
@@ -119,6 +120,16 @@ Compatible with any payment service that implements the EasyPay protocol.
 | **API Base URL** | EasyPay API base address | Yes |
 | **Alipay Channel ID** | Specify Alipay channel (optional) | No |
 | **WeChat Channel ID** | Specify WeChat channel (optional) | No |
+
+### XunHuPay
+
+Integrates [XunHuPay](https://www.xunhupay.com/doc/api/pay.html). Each APPID maps to one payment method (Alipay or WeChat Pay), so create separate apps in the XunHuPay dashboard and route the frontend Alipay / WeChat Pay buttons to the matching source. Desktop checkout shows the official QR image as-is (about 5 minutes of validity); mobile or popup checkout redirects to the hosted cashier URL. Set the notify URL to `https://your-domain.com/api/v1/payment/webhook/xunhupay`; a successful handler returns plain-text `success`.
+
+| Parameter | Description | Required |
+|-----------|-------------|----------|
+| **App ID** | XunHuPay APPID | Yes |
+| **App Secret** | XunHuPay secret | Yes |
+| **API Base URL** | Gateway root, default `https://api.xunhupay.com`; backup `https://api.dpweixin.com` | No |
 
 ### Alipay (Direct)
 
@@ -192,6 +203,7 @@ When adding a provider, the system auto-generates callback URLs from your site d
 | Provider | Callback Path |
 |----------|-------------|
 | **EasyPay** | `https://your-domain.com/api/v1/payment/webhook/easypay` |
+| **XunHuPay** | `https://your-domain.com/api/v1/payment/webhook/xunhupay` |
 | **Alipay (Direct)** | `https://your-domain.com/api/v1/payment/webhook/alipay` |
 | **WeChat Pay (Direct)** | `https://your-domain.com/api/v1/payment/webhook/wxpay` |
 | **Stripe** | `https://your-domain.com/api/v1/payment/webhook/stripe` |

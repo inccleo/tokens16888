@@ -38,6 +38,13 @@ func TestValidateProviderRequest(t *testing.T) {
 			wantErr:        false,
 		},
 		{
+			name:           "valid xunhupay provider",
+			providerKey:    payment.TypeXunHuPay,
+			providerName:   "XunHuPay",
+			supportedTypes: "alipay,wxpay",
+			wantErr:        false,
+		},
+		{
 			name:           "valid stripe with empty types",
 			providerKey:    "stripe",
 			providerName:   "Stripe Provider",
@@ -515,6 +522,15 @@ func TestUpdateProviderInstanceRejectsProtectedConfigChangesWhilePendingOrders(t
 			wantValue:     "pid-test",
 		},
 		{
+			name:          "xunhupay appId",
+			providerKey:   payment.TypeXunHuPay,
+			createConfig:  validXunHuPayProviderConfig,
+			supportedType: []string{payment.TypeAlipay},
+			updateConfig:  map[string]string{"appId": "app-id-updated"},
+			fieldName:     "appId",
+			wantValue:     "app-id-test",
+		},
+		{
 			name:          "stripe currency",
 			providerKey:   payment.TypeStripe,
 			createConfig:  validStripeProviderConfig,
@@ -777,6 +793,18 @@ func validEasyPayProviderConfig(t *testing.T) map[string]string {
 		"apiBase":   "https://pay.example.com",
 		"notifyUrl": "https://merchant.example.com/easypay/notify",
 		"returnUrl": "https://merchant.example.com/easypay/return",
+	}
+}
+
+func validXunHuPayProviderConfig(t *testing.T) map[string]string {
+	t.Helper()
+
+	return map[string]string{
+		"appId":     "app-id-test",
+		"appSecret": "app-secret-test",
+		"apiBase":   "https://api.xunhupay.com",
+		"notifyUrl": "https://merchant.example.com/xunhupay/notify",
+		"returnUrl": "https://merchant.example.com/xunhupay/return",
 	}
 }
 

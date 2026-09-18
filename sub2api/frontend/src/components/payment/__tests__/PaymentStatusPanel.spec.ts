@@ -100,6 +100,29 @@ describe('PaymentStatusPanel', () => {
     expect(wrapper.emitted('success')).toHaveLength(1)
   })
 
+  it('renders a ready-made QR image instead of encoding it as QR content', async () => {
+    const wrapper = mount(PaymentStatusPanel, {
+      props: {
+        orderId: 42,
+        qrCode: '',
+        qrCodeImg: 'https://api.xunhupay.com/qrcode/42.png',
+        expiresAt: '2099-01-01T12:30:00Z',
+        paymentType: 'alipay',
+        orderType: 'balance',
+      },
+      global: {
+        stubs: {
+          Icon: true,
+        },
+      },
+    })
+
+    await flushPromises()
+    const image = wrapper.get('img[src="https://api.xunhupay.com/qrcode/42.png"]')
+    expect(image.exists()).toBe(true)
+    expect(toCanvas).not.toHaveBeenCalled()
+  })
+
   it('shows reopen button in QR mode when payUrl is also available', async () => {
     const openSpy = vi.spyOn(window, 'open').mockReturnValue({ closed: false } as Window)
 

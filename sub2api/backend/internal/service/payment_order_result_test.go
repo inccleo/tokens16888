@@ -95,6 +95,9 @@ func TestBuildCreateOrderResponseDefaultsToOrderCreated(t *testing.T) {
 	if resp.QRCode != "weixin://wxpay/bizpayurl?pr=test" {
 		t.Fatalf("qr_code = %q, want %q", resp.QRCode, "weixin://wxpay/bizpayurl?pr=test")
 	}
+	if resp.QRCodeImg != "" {
+		t.Fatalf("qr_code_img = %q, want empty", resp.QRCodeImg)
+	}
 	if resp.JSAPI != nil || resp.JSAPIPayload != nil {
 		t.Fatal("order_created response should not include jsapi payload")
 	}
@@ -151,6 +154,7 @@ func TestSanitizeCreatePaymentResponseDetailsRemovesNULBytes(t *testing.T) {
 		TradeNo:      "trade\x00-no",
 		PayURL:       "https://pay.example.com/\x00checkout",
 		QRCode:       "wxp://payment-token\x00",
+		QRCodeImg:    "https://pay.example.com/qr\x00.png",
 		ClientSecret: "secret\x00unchanged",
 	}
 
@@ -173,6 +177,12 @@ func TestSanitizeCreatePaymentResponseDetailsRemovesNULBytes(t *testing.T) {
 	}
 	if resp.QRCode != "wxp://payment-token" {
 		t.Fatalf("qr_code = %q, want sanitized QR code", resp.QRCode)
+	}
+	if strings.ContainsRune(resp.QRCodeImg, 0) {
+		t.Fatalf("qr_code_img still contains NUL: %q", resp.QRCodeImg)
+	}
+	if resp.QRCodeImg != "https://pay.example.com/qr.png" {
+		t.Fatalf("qr_code_img = %q, want sanitized image URL", resp.QRCodeImg)
 	}
 	if resp.ClientSecret != "secret\x00unchanged" {
 		t.Fatalf("client_secret = %q, should not be touched by payment detail sanitization", resp.ClientSecret)

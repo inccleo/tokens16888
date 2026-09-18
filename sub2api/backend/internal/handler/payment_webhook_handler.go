@@ -43,6 +43,12 @@ func (h *PaymentWebhookHandler) EasyPayNotify(c *gin.Context) {
 	h.handleNotify(c, payment.TypeEasyPay)
 }
 
+// XunHuPayNotify handles XunHuPay (虎皮椒) payment notifications.
+// POST /api/v1/payment/webhook/xunhupay
+func (h *PaymentWebhookHandler) XunHuPayNotify(c *gin.Context) {
+	h.handleNotify(c, payment.TypeXunHuPay)
+}
+
 // AlipayNotify handles Alipay payment notifications.
 // POST /api/v1/payment/webhook/alipay
 func (h *PaymentWebhookHandler) AlipayNotify(c *gin.Context) {
@@ -153,6 +159,10 @@ func extractOutTradeNo(rawBody, providerKey string) string {
 		if err == nil {
 			return values.Get("out_trade_no")
 		}
+	case payment.TypeXunHuPay:
+		if tradeOrderID := extractXunHuPayTradeOrderID(rawBody); tradeOrderID != "" {
+			return tradeOrderID
+		}
 	case payment.TypeAirwallex:
 		var payload struct {
 			Data struct {
@@ -168,6 +178,27 @@ func extractOutTradeNo(rawBody, providerKey string) string {
 	// For other providers (Stripe, Alipay direct, WxPay direct), the registry
 	// typically has only one instance, so no instance lookup is needed.
 	return ""
+}
+
+func extractXunHuPayTradeOrderID(rawBody string) string {
+	rawBody = strings.TrimSpace(rawBody)
+	if rawBody == "" {
+		return ""
+	}
+	if strings.HasPrefix(rawBody, "{") {
+		var payload struct {
+			TradeOrderID string `json:"trade_order_id"`
+		}
+		if err := json.Unmarshal([]byte(rawBody), &payload); err == nil {
+			return strings.TrimSpace(payload.TradeOrderID)
+		}
+		return ""
+	}
+	values, err := url.ParseQuery(rawBody)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(values.Get("trade_order_id"))
 }
 
 func verifyNotificationWithProviders(ctx context.Context, providers []payment.Provider, rawBody string, headers map[string]string) (string, *payment.PaymentNotification, error) {

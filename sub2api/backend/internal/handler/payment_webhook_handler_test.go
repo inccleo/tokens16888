@@ -62,6 +62,13 @@ func TestWriteSuccessResponse(t *testing.T) {
 			wantBody:        "success",
 		},
 		{
+			name:            "xunhupay returns plain text success",
+			providerKey:     payment.TypeXunHuPay,
+			wantCode:        http.StatusOK,
+			wantContentType: "text/plain",
+			wantBody:        "success",
+		},
+		{
 			name:            "alipay returns plain text success",
 			providerKey:     "alipay",
 			wantCode:        http.StatusOK,
@@ -177,6 +184,18 @@ func TestExtractOutTradeNo(t *testing.T) {
 			providerKey: payment.TypeAirwallex,
 			rawBody:     `{"name":"payment_intent.succeeded","data":{"object":{"merchant_order_id":"sub2_awx_123"}}}`,
 			want:        "sub2_awx_123",
+		},
+		{
+			name:        "xunhupay form payload",
+			providerKey: payment.TypeXunHuPay,
+			rawBody:     "trade_order_id=sub2_xh_123&status=OD",
+			want:        "sub2_xh_123",
+		},
+		{
+			name:        "xunhupay json payload",
+			providerKey: payment.TypeXunHuPay,
+			rawBody:     `{"trade_order_id":"sub2_xh_456","status":"OD"}`,
+			want:        "sub2_xh_456",
 		},
 	}
 

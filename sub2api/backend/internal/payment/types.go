@@ -17,6 +17,7 @@ const (
 	TypeCard         PaymentType = "card"
 	TypeLink         PaymentType = "link"
 	TypeEasyPay      PaymentType = "easypay"
+	TypeXunHuPay     PaymentType = "xunhupay"
 	TypeAirwallex    PaymentType = "airwallex"
 )
 
@@ -84,6 +85,8 @@ func GetBasePaymentType(t string) string {
 	switch {
 	case t == TypeEasyPay:
 		return TypeEasyPay
+	case t == TypeXunHuPay:
+		return TypeXunHuPay
 	case t == TypeAirwallex:
 		return TypeAirwallex
 	case t == TypeStripe || t == TypeCard || t == TypeLink:
@@ -148,6 +151,7 @@ type CreatePaymentResponse struct {
 	TradeNo      string                  // Third-party transaction ID
 	PayURL       string                  // H5 payment URL (alipay/wxpay)
 	QRCode       string                  // QR code content for scanning
+	QRCodeImg    string                  // Ready-to-display QR image URL (not scannable payload)
 	ClientSecret string                  // Stripe PaymentIntent 客户端密钥
 	IntentID     string                  // 前端 SDK 需要的服务商支付意图 ID
 	Currency     string                  // 服务商支付币种

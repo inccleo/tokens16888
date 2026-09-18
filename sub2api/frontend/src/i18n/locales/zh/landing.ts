@@ -12,11 +12,32 @@ export default {
     switchToDark: '切换到深色模式',
     dashboard: '控制台',
     login: '登录',
-    getStarted: '立即开始',
+    register: '注册',
+    getStarted: '开始使用',
+    viewDocsCta: '查看文档',
     goToDashboard: '进入控制台',
-    // 新增：面向用户的价值主张
+    heroEyebrow: 'OpenAI 兼容网关',
+    heroTitle: '一个接口以折扣价接通全球顶级模型',
+    heroTitleLine1: '一个接口',
+    heroTitleLine2: '以折扣价接通全球顶级模型',
     heroSubtitle: '一个密钥，畅用多个 AI 模型',
-    heroDescription: '无需管理多个订阅账号，一站式接入 Claude、GPT、Gemini 等主流 AI 服务',
+    heroDescription:
+      '通过 {site} 用一套兼容 OpenAI 的接口接入全球主流大模型，覆盖文本、图像、视频与多模态能力；统一密钥、统一计费、统一监控，让团队以更低成本快速把生产级 AI 能力接入自己的产品。',
+    promo: {
+      text: '{site} 聚合全球顶级模型，一套接口即可接入',
+      cta: '立即开始'
+    },
+    navLanding: {
+      modelMarket: '模型市场',
+      apiDocs: 'API 文档',
+      pricing: '定价',
+      resources: '资源',
+      support: '支持',
+      playground: '在线试用'
+    },
+    backToTop: '回到顶部',
+    contact: '联系我们',
+    copied: '已复制',
     tags: {
       subscriptionToApi: '订阅转 API',
       stickySession: '会话保持',
@@ -103,11 +124,152 @@ export default {
       antigravity: 'Antigravity',
       more: '更多'
     },
+    preview: {
+      console: '控制台',
+      apiKeys: 'API 密钥',
+      usage: '用量',
+      billing: '账单',
+      demoUser: '演示用户',
+      credits: '积分',
+      balance: '当前余额',
+      requests: '请求次数',
+      tokens: '总 Token 数',
+      board: '看板',
+      agent: '智能体',
+      tasks: '任务',
+      activity: '活动',
+      supportTitle: '服务与支持',
+      supportDesc: '模型、账单、API 文档与客服支持集中在同一个控制台。',
+      today: '今天',
+      yesterday: '昨天',
+      days7: '近 7 天',
+      days30: '近 30 天',
+      currentBalance: '当前余额（积分）',
+      historicalSpend: '历史消费（积分）',
+      statCount: '统计次数',
+      statCredits: '统计额度（积分）',
+      vsLast: '较上一周期',
+      spendTrend: '消费趋势',
+      callDist: '调用分布',
+      callRank: '调用排行',
+      total: '合计'
+    },
+    gateway: {
+      title: '定义你的 AI API 聚合层',
+      subtitle: '把模型能力、成本、密钥、监控与故障切换收敛到统一网关，让团队用一套 OpenAI 兼容接口管理全部 AI 调用。',
+      modelIndependence: '模型独立性',
+      modelIndependenceDesc: '按编码、推理、速度、成本和上下文选择最优路由，不绑定单一供应商。',
+      sovereignAccess: '主权接入',
+      openaiCompatible: 'OpenAI 兼容',
+      openaiCompatibleDesc: '现有 SDK 一行迁移',
+      unifiedBilling: '统一计费',
+      unifiedBillingDesc: '所有模型族共享积分余额',
+      vendorRouting: '供应商路由',
+      vendorRoutingDesc: '按健康状态跨供应商调度',
+      dedicatedSupport: '专属支持',
+      dedicatedSupportDesc: '文档、充值与客服在同一流程',
+      axisCoding: '编码',
+      axisReasoning: '推理',
+      axisSpeed: '速度',
+      axisCost: '成本',
+      axisContext: '上下文',
+      axisTools: '工具',
+      bestRoute: '最优路由',
+      lifecycleTitle: '覆盖 API 调用全生命周期',
+      sharedControl: '共享控制',
+      nodeKey: '密钥',
+      nodePrice: '价格',
+      nodeRoute: '路由',
+      nodeCall: '调用',
+      nodeTask: '任务',
+      nodeBill: '账单',
+      nodeLog: '日志',
+      nodeSupport: '支持',
+      lifecycleNote: '不只是接入。每次请求都会强化成本、路由与可见性。',
+      oneAccount: '{providers} — 一个账户，一张账单'
+    },
+    llms: {
+      kicker: 'llms.txt',
+      title: '仅需一行指令，即可在任意 Agent 使用 {site}',
+      desc: '复制一段提示词到 CodeX、Claude、Cursor 等任意 Agent，让它立刻读懂 {site} 全部模型和接口，并向其提问。',
+      copy: '复制提示词给 AI',
+      prompt:
+        '请阅读以下 {site} 的文档索引，并基于此回答我的问题：\n\n{docs}\n\n关于 {site}：统一的 AI API 网关，通过 OpenAI 兼容协议提供主流模型 —— 聊天（GPT、Claude、Gemini）、图像、视频、音频，按成功请求计费。\n\n我的问题：如何用 Python 调用聊天接口？'
+    },
+    models: {
+      kicker: '模型',
+      title: '热门模型',
+      subtitle: '精选各类目顶级模型，几分钟即可开始接入。',
+      image: '图像',
+      video: '视频',
+      chat: '对话',
+      viewAll: '查看全部模型',
+      savePct: '省 {pct}%'
+    },
+    integrate: {
+      title: '3 分钟快速集成',
+      subtitle: '几分钟内即可开始使用数百种 AI 模型',
+      step1Title: '注册，创建密钥',
+      step1Desc: '注册账户并在仪表板中生成您的专属 API 密钥，无需信用卡即可开始',
+      step2Title: '修改配置',
+      step2Desc: '将 API 端点更改为本站地址，OpenAI SDK 用户只需修改一行代码',
+      step3Title: '开始调用模型',
+      step3Desc: '通过统一接口访问 GPT、Claude、Sora 等数百种 AI 模型，即刻开启 AI 之旅',
+      getKey: '获取 API 密钥',
+      viewDocs: '查看文档',
+      tryPlayground: '在线试用'
+    },
+    why: {
+      kicker: '为什么选择 {site}',
+      title: '为什么选择 {site}',
+      subtitle: '统一平台、透明计价、真人支持，让你专注于产品本身。',
+      official: {
+        title: '官方直连',
+        desc: '聚合官方与认证渠道，链路清晰，告别层层转手。'
+      },
+      pricing: {
+        title: '透明计价',
+        desc: '按 token / 按次计费一目了然，方便做成本预测。'
+      },
+      console: {
+        title: '统一控制台',
+        desc: '密钥、配额、用量在多模型间统一查看与管理。'
+      },
+      integrate: {
+        title: '快速接入',
+        desc: '兼容常见调用格式，示例代码改配置即可跑通。'
+      },
+      discount: {
+        title: '组合折扣',
+        desc: '多模型组合与用量阶梯，让规模使用更划算。'
+      },
+      support: {
+        title: '真人支持',
+        desc: '集成与账单问题有人跟进，不靠纯机器人。'
+      }
+    },
+    faq: {
+      kicker: '常见问题',
+      title: '常见问题',
+      q1: '这是什么，能提供什么？',
+      a1: '这是一个统一的 AI API 网关。通过一套 OpenAI 兼容接口接入多个上游模型，统一密钥、计费和监控，覆盖聊天、图像、视频等多模态能力。',
+      q2: '与其他 API 提供商相比，定价如何？',
+      a2: '按量付费，无最低月费或隐藏费用。token / 按次计费一目了然，用量上来后可享受阶梯折扣。',
+      q3: '如何集成到我的应用？',
+      a3: '注册并创建 API 密钥，把 base_url 改成本站地址，即可用现有 OpenAI SDK 开始调用。',
+      q4: '为什么不直接用官方供应商？',
+      a4: '一个账户、一张账单即可访问多个模型，不用再为 Claude、OpenAI、Google 分别维护密钥和发票。',
+      q5: 'API Key 安全吗？',
+      a5: '密钥加密存储。你可以随时在控制台生成新密钥或撤销旧密钥。',
+      q6: '支持哪些支付方式？能开发票吗？',
+      a6: '支持常见在线支付与余额充值。如需发票，请登录后在订单或工单中提交开票信息。'
+    },
     // CTA 区块
     cta: {
+      kicker: '开始使用',
       title: '准备好开始了吗？',
-      description: '注册即可获得免费试用额度，体验一站式 AI 服务',
-      button: '免费注册'
+      description: '开发者信赖 · 聚合全球领先 AI 供应商',
+      button: '立即开始'
     },
     footer: {
       allRightsReserved: '保留所有权利。'

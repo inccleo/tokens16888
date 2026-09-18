@@ -26,6 +26,15 @@ describe('PROVIDER_CONFIG_FIELDS.wxpay', () => {
   })
 })
 
+describe('PROVIDER_CONFIG_FIELDS.xunhupay', () => {
+  it('requires app credentials and defaults the official API host', () => {
+    expect(findField('xunhupay', 'appId')?.sensitive).toBe(false)
+    expect(findField('xunhupay', 'appSecret')?.sensitive).toBe(true)
+    expect(findField('xunhupay', 'apiBase')?.defaultValue).toBe('https://api.xunhupay.com')
+    expect(findField('xunhupay', 'apiBase')?.hintKey).toBe('admin.settings.payment.field_xunhupayApiBaseHint')
+  })
+})
+
 describe('PROVIDER_CONFIG_FIELDS.airwallex', () => {
   it('adds currency config with CNY as the default', () => {
     const currency = findField('airwallex', 'currency')
