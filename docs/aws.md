@@ -154,8 +154,8 @@ echo YOUR_GITHUB_TOKEN | sudo docker login ghcr.io -u inccleo --password-stdin
 
 | 项 | 值 |
 |---|---|
-| 访问地址 | http://tokens16888.com |
-| 健康检查 | http://tokens16888.com/health |
+| 访问地址 | https://tokens16888.com 、 https://www.tokens16888.com |
+| 健康检查 | https://tokens16888.com/health |
 | Nginx | `/etc/nginx/sites-available/tokens16888.com` |
 | 应用绑定 | `127.0.0.1:8080`（不对外开放） |
 | 服务器目录 | `/opt/tokens16888` |
@@ -170,19 +170,20 @@ ssh -i ~/.ssh/tokens16888.pem ubuntu@54.151.248.175
 cat /opt/tokens16888/.admin_password
 ```
 
-然后浏览器打开 http://tokens16888.com ，用上面的邮箱和密码登录。不要用 `IP:8080`。
+然后浏览器打开 https://tokens16888.com 或 https://www.tokens16888.com ，用上面的邮箱和密码登录。不要用 `IP:8080`。
 
-Cloudflare 可以继续用橙色云（已代理）。`tokens16888.com` 只保留这一条 A 记录：
+Cloudflare 可以继续用橙色云（已代理）。只保留这两条记录：
 
 | 名称 | 类型 | 内容 | 代理 |
 |---|---|---|---|
 | `tokens16888.com` | A | `54.151.248.175` | 已代理 |
+| `www` | CNAME | `tokens16888.com` | 已代理 |
 
 不要再挂 `54.149.79.189`、`34.216.117.25` 这些旧 IP，否则会轮询到停车页。
 
 源站 80/443 都已开。Cloudflare SSL/TLS 用 **Full** 即可（不要用 Full (strict)，源站现在是自签证书）。
 
-浏览器打开 `https://tokens16888.com`。如果还看到 521，硬刷新或清缓存后再试。
+浏览器打开 `https://tokens16888.com` 或 `https://www.tokens16888.com`。如果还看到 521，硬刷新或清缓存后再试。 `www` 没解析时，先在 Cloudflare 加上面那条 CNAME。
 
 常用命令（SSH 到服务器后）：
 
@@ -191,6 +192,48 @@ cd /opt/tokens16888
 sudo docker compose ps
 sudo docker compose logs -f sub2api
 sudo docker compose restart
+sudo docker compose pull && sudo docker compose up -d
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+## 4.1 ChatGPT2API（image.tokens16888.com）
+
+同一台 Lightsail 上另部署了官方 [yukkcat/chatgpt2api](https://github.com/yukkcat/chatgpt2api)。应用只监听本机 `127.0.0.1:3000`，公网 **不要开 3000**。对外走 `image.tokens16888.com`（Nginx 反代 + Let's Encrypt）。
+
+| 项 | 值 |
+|---|---|
+| 访问地址 | https://image.tokens16888.com |
+| OpenAI 兼容 API | https://image.tokens16888.com/v1 |
+| Nginx | `/etc/nginx/sites-available/image.tokens16888.com` |
+| 证书 | `/etc/letsencrypt/live/image.tokens16888.com/`（Let's Encrypt，自动续期） |
+| 应用绑定 | `127.0.0.1:3000`（不对外开放） |
+| 服务器目录 | `/opt/chatgpt2api` |
+| Compose 文件 | `/opt/chatgpt2api/docker-compose.yml` |
+| 镜像 | `ghcr.io/yukkcat/chatgpt2api:latest` |
+| 数据库 | SQLite：`/opt/chatgpt2api/data/chatgpt2api.db` |
+| 管理员密钥 | 在服务器 `/opt/chatgpt2api/.auth_key`，不要提交 Git |
+
+DNS 用灰色云（DNS only）直指源站，才能申请 Let's Encrypt：
+
+| 名称 | 类型 | 内容 | 代理 |
+|---|---|---|---|
+| `image` | A | `54.151.248.175` | 仅 DNS |
+
+登录控制台：
+
+```bash
+ssh -i ~/.ssh/tokens16888.pem ubuntu@54.151.248.175
+cat /opt/chatgpt2api/.auth_key
+```
+
+然后打开 https://image.tokens16888.com ，用上面的密钥登录。不要用 `IP:3000`。
+
+常用命令：
+
+```bash
+cd /opt/chatgpt2api
+sudo docker compose ps
+sudo docker compose logs -f
 sudo docker compose pull && sudo docker compose up -d
 sudo nginx -t && sudo systemctl reload nginx
 ```
@@ -246,3 +289,5 @@ aws lightsail open-instance-public-ports \
 | 域名还是停车页 | Cloudflare 同一域名挂了多条 A 记录，删掉旧 IP，只留 `54.151.248.175` |
 | `Error 521 Web server is down` | Cloudflare 在回源 443，源站当时没开 HTTPS。现在已开。SSL 用 Full，不要 Full (strict) |
 | `IP:8080` 打不开 | 正常。8080 只绑 `127.0.0.1`，公网已关闭 |
+| `IP:3000` 打不开 | 正常。chatgpt2api 只绑 `127.0.0.1:3000`，公网已关闭 |
+| `image.tokens16888.com` 证书失败 | 确认 Cloudflare 是灰色云（DNS only），A 记录指向 `54.151.248.175` |
