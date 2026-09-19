@@ -163,6 +163,7 @@ export default {
 
   // Navigation
   nav: {
+    home: 'Home',
     dashboard: 'Dashboard',
     announcements: 'Announcements',
     apiKeys: 'API Keys',
@@ -227,6 +228,7 @@ export default {
     passkeyCancelled: 'Passkey sign-in was cancelled.',
     passkeyFailed: 'Passkey sign-in failed. Please try again.',
     createAccount: 'Create Account',
+    adminConsoleLogin: 'Admin Console Login',
     signUpToStart: 'Sign up to start using {siteName}',
     signUp: 'Sign up',
     processing: 'Processing...',

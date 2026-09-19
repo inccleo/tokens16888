@@ -6,6 +6,9 @@ import NavigationProgress from '@/components/common/NavigationProgress.vue'
 import AdminComplianceDialog from '@/components/admin/AdminComplianceDialog.vue'
 import { resolveRouteDocumentTitle } from '@/router/title'
 import AnnouncementPopup from '@/components/common/AnnouncementPopup.vue'
+import PublicLayout from '@/layouts/PublicLayout.vue'
+import UserLayout from '@/layouts/UserLayout.vue'
+import AdminLayout from '@/layouts/AdminLayout.vue'
 import { useAppStore, useAuthStore, useSubscriptionStore, useAnnouncementStore, useAdminComplianceStore, useAdminSettingsStore } from '@/stores'
 import { getSetupStatus } from '@/api/setup'
 import { updateFavicon } from '@/utils/branding'
@@ -20,6 +23,14 @@ const subscriptionStore = useSubscriptionStore()
 const announcementStore = useAnnouncementStore()
 const adminComplianceStore = useAdminComplianceStore()
 const adminSettingsStore = useAdminSettingsStore()
+
+// 路由级外壳解析器：按 route.meta.layout 选择布局；未声明则返回 null，
+// 由模板走 <RouterView> 裸渲染分支，保持旧页面（自带 AppLayout）行为不变。
+const layoutComponents = { public: PublicLayout, user: UserLayout, admin: AdminLayout } as const
+const layoutComponent = computed(() => {
+  const key = route.meta.layout as keyof typeof layoutComponents | undefined
+  return key ? layoutComponents[key] ?? null : null
+})
 
 function updateDocumentTitle() {
   const customMenuItems = [
@@ -163,7 +174,12 @@ onMounted(async () => {
 
 <template>
   <NavigationProgress />
-  <RouterView />
+  <!-- 路由级外壳解析：设置了 meta.layout 的路由由对应 Layout 包裹；
+       未设置的路由保持现状（页面自带 AppLayout 等），此处直接渲染 RouterView。 -->
+  <component :is="layoutComponent" v-if="layoutComponent">
+    <RouterView />
+  </component>
+  <RouterView v-else />
   <Toast />
   <AnnouncementPopup />
   <AdminComplianceDialog />

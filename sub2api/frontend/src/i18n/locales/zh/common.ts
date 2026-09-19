@@ -163,6 +163,7 @@ export default {
 
   // Navigation
   nav: {
+    home: '首页',
     dashboard: '仪表盘',
     announcements: '公告',
     apiKeys: 'API 密钥',
@@ -227,6 +228,7 @@ export default {
     passkeyCancelled: '已取消 Passkey 登录。',
     passkeyFailed: 'Passkey 登录失败，请重试。',
     createAccount: '创建账户',
+    adminConsoleLogin: '管理员控制台登录',
     signUpToStart: '注册以开始使用 {siteName}',
     signUp: '注册',
     processing: '处理中...',

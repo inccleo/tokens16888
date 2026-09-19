@@ -4,57 +4,63 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-const componentPath = resolve(dirname(fileURLToPath(import.meta.url)), '../AppSidebar.vue')
-const componentSource = readFileSync(componentPath, 'utf8')
-const stylePath = resolve(dirname(fileURLToPath(import.meta.url)), '../../../style.css')
-const styleSource = readFileSync(stylePath, 'utf8')
+// 阶段 1 导航拆分后，原 AppSidebar 的实现被分解到：
+// - SidebarShell.vue：渲染 + 滚动持久化 + 分组展开 + 自定义 SVG 图标样式
+// - nav/useUserNav.ts：用户导航数据（含订阅 flag、购买文案）
+// - nav/useAdminNav.ts：管理员导航数据（含管理端订阅入口 flag）
+// 这些守卫断言随之指向新的归属文件。
+const dir = dirname(fileURLToPath(import.meta.url))
+const shellSource = readFileSync(resolve(dir, '../SidebarShell.vue'), 'utf8')
+const userNavSource = readFileSync(resolve(dir, '../nav/useUserNav.ts'), 'utf8')
+const adminNavSource = readFileSync(resolve(dir, '../nav/useAdminNav.ts'), 'utf8')
+const styleSource = readFileSync(resolve(dir, '../../../style.css'), 'utf8')
 
-describe('AppSidebar custom SVG styles', () => {
+describe('SidebarShell custom SVG styles', () => {
   it('does not override uploaded SVG fill or stroke colors', () => {
-    expect(componentSource).toContain('.sidebar-svg-icon {')
-    expect(componentSource).toContain('color: currentColor;')
-    expect(componentSource).toContain('display: block;')
-    expect(componentSource).not.toContain('stroke: currentColor;')
-    expect(componentSource).not.toContain('fill: none;')
+    expect(shellSource).toContain('.sidebar-svg-icon {')
+    expect(shellSource).toContain('color: currentColor;')
+    expect(shellSource).toContain('display: block;')
+    expect(shellSource).not.toContain('stroke: currentColor;')
+    expect(shellSource).not.toContain('fill: none;')
   })
 })
 
-describe('AppSidebar scroll position persistence', () => {
+describe('SidebarShell scroll position persistence', () => {
   it('binds a template ref to the sidebar nav element', () => {
-    expect(componentSource).toContain('ref="sidebarNavRef"')
-    expect(componentSource).toContain('sidebar-nav')
+    expect(shellSource).toContain('ref="sidebarNavRef"')
+    expect(shellSource).toContain('sidebar-nav')
   })
 
   it('declares sidebarNavRef in script setup', () => {
-    expect(componentSource).toContain("const sidebarNavRef = ref<HTMLElement | null>(null)")
+    expect(shellSource).toContain("const sidebarNavRef = ref<HTMLElement | null>(null)")
   })
 
   it('saves scroll position on beforeUnmount', () => {
-    expect(componentSource).toContain('onBeforeUnmount')
-    expect(componentSource).toContain('appStore.sidebarScrollTop')
-    expect(componentSource).toContain('sidebarNavRef.value.scrollTop')
+    expect(shellSource).toContain('onBeforeUnmount')
+    expect(shellSource).toContain('appStore.sidebarScrollTop')
+    expect(shellSource).toContain('sidebarNavRef.value.scrollTop')
   })
 
   it('restores scroll position on mount', () => {
-    expect(componentSource).toContain('onMounted')
-    expect(componentSource).toContain('appStore.sidebarScrollTop')
-    expect(componentSource).toContain('nextTick')
+    expect(shellSource).toContain('onMounted')
+    expect(shellSource).toContain('appStore.sidebarScrollTop')
+    expect(shellSource).toContain('nextTick')
   })
 })
 
-describe('AppSidebar collapsible groups', () => {
+describe('SidebarShell collapsible groups', () => {
   it('lets the user collapse a group even while a child route is active', () => {
     // The expand state must come from the user's override first, falling back
     // to the active-route heuristic only when the user has not clicked yet.
-    expect(componentSource).toContain('const groupExpandOverrides = ref<Map<string, boolean>>(new Map())')
-    expect(componentSource).not.toContain('expandedGroups.value.has(item.path) || isGroupActive(item)')
+    expect(shellSource).toContain('const groupExpandOverrides = ref<Map<string, boolean>>(new Map())')
+    expect(shellSource).not.toContain('expandedGroups.value.has(item.path) || isGroupActive(item)')
   })
 })
 
-describe('AppSidebar header styles', () => {
+describe('SidebarShell header styles', () => {
   it('does not clip the version badge dropdown', () => {
     const sidebarHeaderBlockMatch = styleSource.match(/\.sidebar-header\s*\{[\s\S]*?\n {2}\}/)
-    const sidebarBrandBlockMatch = componentSource.match(/\.sidebar-brand\s*\{[\s\S]*?\n\}/)
+    const sidebarBrandBlockMatch = shellSource.match(/\.sidebar-brand\s*\{[\s\S]*?\n\}/)
 
     expect(sidebarHeaderBlockMatch).not.toBeNull()
     expect(sidebarBrandBlockMatch).not.toBeNull()
@@ -63,20 +69,20 @@ describe('AppSidebar header styles', () => {
   })
 })
 
-describe('AppSidebar subscription feature flag', () => {
+describe('sidebar subscription feature flag', () => {
   it('gates the My Subscriptions entry behind the subscription public-settings flag', () => {
-    expect(componentSource).toContain('const flagSubscription = makeSidebarFlag(FeatureFlags.subscription)')
-    expect(componentSource).toMatch(/path: '\/subscriptions'[^\n]*featureFlag: flagSubscription/)
+    expect(userNavSource).toContain('const flagSubscription = makeSidebarFlag(FeatureFlags.subscription)')
+    expect(userNavSource).toMatch(/path: '\/subscriptions'[^\n]*featureFlag: flagSubscription/)
   })
 
   it('also hides the admin Subscription Management entry on recharge-only sites', () => {
-    expect(componentSource).toMatch(/path: '\/admin\/subscriptions'[^\n]*featureFlag: flagSubscription/)
+    expect(adminNavSource).toMatch(/path: '\/admin\/subscriptions'[^\n]*featureFlag: flagSubscription/)
   })
 
   it('derives the purchase entry label from the site billing mode', () => {
-    expect(componentSource).toContain("import { resolveSiteBillingMode } from '@/utils/siteBillingMode'")
-    expect(componentSource).toMatch(/case 'recharge_only':\s*return t\('nav\.recharge'\)/)
-    expect(componentSource).toMatch(/case 'subscription_only':\s*return t\('nav\.subscribe'\)/)
-    expect(componentSource).toMatch(/path: '\/purchase'[^\n]*label: purchaseNavLabel\.value/)
+    expect(userNavSource).toContain("import { resolveSiteBillingMode } from '@/utils/siteBillingMode'")
+    expect(userNavSource).toMatch(/case 'recharge_only':\s*return t\('nav\.recharge'\)/)
+    expect(userNavSource).toMatch(/case 'subscription_only':\s*return t\('nav\.subscribe'\)/)
+    expect(userNavSource).toMatch(/path: '\/purchase'[^\n]*label: purchaseNavLabel\.value/)
   })
 })

@@ -76,7 +76,7 @@ function simulateGuard(
   if (!requiresAuth) {
     if (
       authState.isAuthenticated &&
-      (toPath === '/login' || toPath === '/register')
+      (toPath === '/login' || toPath === '/register' || toPath === '/admin/login')
     ) {
       if (authState.backendModeEnabled && !authState.isAdmin) {
         return null
@@ -84,7 +84,7 @@ function simulateGuard(
       return authState.isAdmin ? '/admin/dashboard' : '/dashboard'
     }
     if (authState.backendModeEnabled && !authState.isAuthenticated) {
-      const allowed = ['/login', '/key-usage', '/setup', '/payment/result']
+      const allowed = ['/login', '/admin/login', '/key-usage', '/setup', '/payment/result']
       const callbackPaths = [
         '/auth/callback',
         '/auth/linuxdo/callback',
@@ -132,7 +132,7 @@ function simulateGuard(
     if (authState.isAuthenticated && authState.isAdmin) {
       return null
     }
-    const allowed = ['/login', '/key-usage', '/setup', '/payment/result']
+    const allowed = ['/login', '/admin/login', '/key-usage', '/setup', '/payment/result']
     const callbackPaths = [
       '/auth/callback',
       '/auth/linuxdo/callback',
@@ -216,6 +216,11 @@ describe('路由守卫逻辑', () => {
       expect(redirect).toBeNull()
     })
 
+    it('已登录再访问 /admin/login 重定向到 /dashboard', () => {
+      const redirect = simulateGuard('/admin/login', { requiresAuth: false, adminEntry: true }, authState)
+      expect(redirect).toBe('/dashboard')
+    })
+
     it('访问管理页面被拒绝，重定向到 /dashboard', () => {
       const redirect = simulateGuard('/admin/dashboard', { requiresAdmin: true }, authState)
       expect(redirect).toBe('/dashboard')
@@ -240,6 +245,11 @@ describe('路由守卫逻辑', () => {
 
     it('访问 /login 重定向到 /admin/dashboard', () => {
       const redirect = simulateGuard('/login', { requiresAuth: false }, authState)
+      expect(redirect).toBe('/admin/dashboard')
+    })
+
+    it('已登录再访问 /admin/login 重定向到 /admin/dashboard', () => {
+      const redirect = simulateGuard('/admin/login', { requiresAuth: false, adminEntry: true }, authState)
       expect(redirect).toBe('/admin/dashboard')
     })
 

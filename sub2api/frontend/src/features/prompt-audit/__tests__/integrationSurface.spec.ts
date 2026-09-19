@@ -19,7 +19,8 @@ describe('Prompt Audit integration surface', () => {
   })
 
   it('keeps the legacy content moderation route and adds both pages under an expand-only security group', () => {
-    const sidebar = read('../../../components/layout/AppSidebar.vue')
+    // 阶段 1 导航拆分后，管理员导航数据移至 nav/useAdminNav.ts。
+    const sidebar = read('../../../components/layout/nav/useAdminNav.ts')
     const group = sidebar.slice(sidebar.indexOf("path: '/admin/security-audit'"), sidebar.indexOf("path: '/admin/redeem'"))
     expect(group).toContain('expandOnly: true')
     expect(group).toContain("path: '/admin/risk-control'")

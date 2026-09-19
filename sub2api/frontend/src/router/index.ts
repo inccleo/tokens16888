@@ -60,6 +60,17 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: () => import('@/views/auth/AdminLoginView.vue'),
+    meta: {
+      requiresAuth: false,
+      adminEntry: true,
+      title: 'Admin Login',
+      titleKey: 'auth.adminConsoleLogin'
+    }
+  },
+  {
     path: '/email-verify',
     name: 'EmailVerify',
     component: () => import('@/views/auth/EmailVerifyView.vue'),
@@ -178,6 +189,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/model-plaza',
     name: 'ModelPlaza',
+    alias: '/console/models',
     component: () => import('@/views/ModelPlazaView.vue'),
     meta: {
       requiresAuth: false,
@@ -194,10 +206,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/dashboard',
     name: 'Dashboard',
+    alias: '/console',
     component: () => import('@/views/user/DashboardView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Dashboard',
       titleKey: 'dashboard.title',
       descriptionKey: 'dashboard.welcomeMessage'
@@ -206,10 +220,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/keys',
     name: 'Keys',
+    alias: '/console/keys',
     component: () => import('@/views/user/KeysView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'API Keys',
       titleKey: 'keys.title',
       descriptionKey: 'keys.description'
@@ -218,11 +234,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/batch-image',
     name: 'BatchImageGuide',
-    alias: '/docs/batch-image',
+    alias: ['/docs/batch-image', '/console/docs'],
     component: () => import('@/views/user/BatchImageGuideView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Batch Image Guide',
       titleKey: 'batchImageGuide.title',
       descriptionKey: 'batchImageGuide.description'
@@ -231,10 +248,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/usage',
     name: 'Usage',
+    alias: '/console/usage',
     component: () => import('@/views/user/UsageView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Usage Records',
       titleKey: 'usage.title',
       descriptionKey: 'usage.description'
@@ -243,10 +262,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/redeem',
     name: 'Redeem',
+    alias: '/console/redeem',
     component: () => import('@/views/user/RedeemView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Redeem Code',
       titleKey: 'redeem.title',
       descriptionKey: 'redeem.description'
@@ -255,10 +276,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/affiliate',
     name: 'Affiliate',
+    alias: '/console/affiliate',
     component: () => import('@/views/user/AffiliateView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Affiliate',
       titleKey: 'affiliate.title',
       descriptionKey: 'affiliate.description'
@@ -271,6 +294,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Available Channels',
       titleKey: 'availableChannels.title',
       descriptionKey: 'availableChannels.description'
@@ -279,10 +303,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/profile',
     name: 'Profile',
+    alias: '/console/profile',
     component: () => import('@/views/user/ProfileView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Profile',
       titleKey: 'profile.title',
       descriptionKey: 'profile.description'
@@ -291,10 +317,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/subscriptions',
     name: 'Subscriptions',
+    alias: '/console/subscriptions',
     component: () => import('@/views/user/SubscriptionsView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'My Subscriptions',
       titleKey: 'userSubscriptions.title',
       descriptionKey: 'userSubscriptions.description',
@@ -304,10 +332,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/purchase',
     name: 'PurchaseSubscription',
+    alias: '/console/billing',
     component: () => import('@/views/user/PaymentView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Purchase Subscription',
       titleKey: 'nav.buySubscription',
       descriptionKey: 'purchase.description',
@@ -317,10 +347,12 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/orders',
     name: 'OrderList',
+    alias: '/console/orders',
     component: () => import('@/views/user/UserOrdersView.vue'),
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'My Orders',
       titleKey: 'nav.myOrders',
       requiresPayment: true
@@ -392,6 +424,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Custom Page',
       titleKey: 'customPage.title',
     }
@@ -409,6 +442,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Admin Dashboard',
       titleKey: 'admin.dashboard.title',
       descriptionKey: 'admin.dashboard.description'
@@ -433,6 +467,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Audit Logs',
       titleKey: 'admin.audit.title',
       descriptionKey: 'admin.audit.description'
@@ -445,6 +480,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'User Management',
       titleKey: 'admin.users.title',
       descriptionKey: 'admin.users.description'
@@ -457,6 +493,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Group Management',
       titleKey: 'admin.groups.title',
       descriptionKey: 'admin.groups.description'
@@ -473,6 +510,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Channel Management',
       titleKey: 'admin.channels.title',
       descriptionKey: 'admin.channels.description'
@@ -485,6 +523,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Channel Monitor',
       titleKey: 'admin.channelMonitor.title',
       descriptionKey: 'admin.channelMonitor.description'
@@ -497,6 +536,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
+      layout: 'user',
       title: 'Channel Status',
       titleKey: 'nav.channelStatus'
     }
@@ -508,6 +548,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Subscription Management',
       titleKey: 'admin.subscriptions.title',
       descriptionKey: 'admin.subscriptions.description'
@@ -520,6 +561,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Account Management',
       titleKey: 'admin.accounts.title',
       descriptionKey: 'admin.accounts.description'
@@ -532,6 +574,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Plugin Management',
       titleKey: 'admin.plugins.title',
       descriptionKey: 'admin.plugins.description'
@@ -544,6 +587,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Announcements',
       titleKey: 'admin.announcements.title',
       descriptionKey: 'admin.announcements.description'
@@ -556,6 +600,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Proxy Management',
       titleKey: 'admin.proxies.title',
       descriptionKey: 'admin.proxies.description'
@@ -568,6 +613,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Redeem Code Management',
       titleKey: 'admin.redeem.title',
       descriptionKey: 'admin.redeem.description'
@@ -580,6 +626,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Promo Code Management',
       titleKey: 'admin.promo.title',
       descriptionKey: 'admin.promo.description'
@@ -592,6 +639,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'System Settings',
       titleKey: 'admin.settings.title',
       descriptionKey: 'admin.settings.description'
@@ -604,6 +652,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Risk Control',
       titleKey: 'admin.riskControl.title',
       descriptionKey: 'admin.riskControl.description',
@@ -617,6 +666,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Prompt Audit',
       titleKey: 'admin.promptAudit.title',
       descriptionKey: 'admin.promptAudit.description',
@@ -630,6 +680,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Usage Records',
       titleKey: 'admin.usage.title',
       descriptionKey: 'admin.usage.description'
@@ -646,6 +697,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Affiliate Invite Records',
       titleKey: 'nav.affiliateInviteRecords',
       descriptionKey: 'admin.affiliates.invitesDescription'
@@ -658,6 +710,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Affiliate Rebate Records',
       titleKey: 'nav.affiliateRebateRecords',
       descriptionKey: 'admin.affiliates.rebatesDescription'
@@ -670,6 +723,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Affiliate Transfer Records',
       titleKey: 'nav.affiliateTransferRecords',
       descriptionKey: 'admin.affiliates.transfersDescription'
@@ -685,6 +739,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Payment Dashboard',
       titleKey: 'nav.paymentDashboard',
       requiresPayment: true
@@ -697,6 +752,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Order Management',
       titleKey: 'nav.orderManagement',
       requiresPayment: true
@@ -709,6 +765,7 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: true,
+      layout: 'admin',
       title: 'Subscription Plans',
       titleKey: 'nav.paymentPlans',
       requiresPayment: true
@@ -751,7 +808,7 @@ let authInitialized = false
 const navigationLoading = useNavigationLoadingState()
 // 延迟初始化预加载，传入 router 实例
 let routePrefetch: ReturnType<typeof useRoutePrefetch> | null = null
-const BACKEND_MODE_ALLOWED_PATHS = ['/login', '/key-usage', '/setup', '/payment/result', '/payment/airwallex', '/legal']
+const BACKEND_MODE_ALLOWED_PATHS = ['/login', '/admin/login', '/key-usage', '/setup', '/payment/result', '/payment/airwallex', '/legal']
 const BACKEND_MODE_CALLBACK_PATHS = [
   '/auth/callback',
   '/auth/linuxdo/callback',
@@ -819,14 +876,19 @@ router.beforeEach(async (to, _from, next) => {
   // If route doesn't require auth, allow access
   if (!requiresAuth) {
     // If already authenticated and trying to access login/register, redirect to appropriate dashboard
-    if (authStore.isAuthenticated && (to.path === '/login' || to.path === '/register')) {
+    if (
+      authStore.isAuthenticated &&
+      (to.path === '/login' || to.path === '/register' || to.path === '/admin/login')
+    ) {
       // In backend mode, non-admin users should NOT be redirected away from login
       // (they are blocked from all protected routes, so redirecting would cause a loop)
       if (appStore.backendModeEnabled && !authStore.isAdmin) {
         next()
         return
       }
-      // Admin users go to admin dashboard, regular users go to user dashboard
+      // 已登录用户不应停留在登录/注册页：管理员回管理员端，普通用户回用户端。
+      // 注意：这是「已登录再访问登录页」的兜底跳转；真正的「登录动作」落点由
+      // LoginView 依据入口（/login vs /admin/login）决定，角色不再是唯一依据。
       next(authStore.isAdmin ? '/admin/dashboard' : '/dashboard')
       return
     }

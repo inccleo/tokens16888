@@ -20,6 +20,22 @@ declare module 'vue-router' {
     requiresAdmin?: boolean
 
     /**
+     * 该路由使用的外壳布局。由 App.vue 的布局解析器读取：
+     * - 'public'：公共站点顶部导航外壳（PublicLayout）
+     * - 'user'：用户控制台外壳（UserLayout）
+     * - 'admin'：管理员控制台外壳（AdminLayout）
+     * 未设置时保持现状：页面自行渲染布局（如自带 AppLayout 的旧页面），App.vue 不再包裹。
+     * 阶段 1 迁移期两种方式并存，页面逐个从「自带 AppLayout」切换到「meta.layout + 路由级外壳」。
+     */
+    layout?: 'public' | 'user' | 'admin'
+
+    /**
+     * 标记该路由为管理员登录入口（/admin/login）。LoginView 据此把登录后的默认
+     * 落点设为管理员端（/admin/dashboard），而用户入口（/login）默认进用户端。
+     */
+    adminEntry?: boolean
+
+    /**
      * Page title for this route
      */
     title?: string

@@ -261,6 +261,15 @@ const router = useRouter()
 const authStore = useAuthStore()
 const appStore = useAppStore()
 
+// adminEntry 由 /admin/login 入口传入（或路由 meta.adminEntry）。
+// 管理员入口登录后默认进入管理员端，用户入口默认进入用户端；
+// 角色不再作为「进哪个前端」的唯一依据，入口决定默认落点。
+const props = defineProps<{ adminEntry?: boolean }>()
+const isAdminEntry = computed(
+  () => props.adminEntry === true || router.currentRoute.value.meta.adminEntry === true
+)
+const defaultRedirectPath = computed(() => (isAdminEntry.value ? '/admin/dashboard' : '/dashboard'))
+
 // ==================== State ====================
 
 const isLoading = ref<boolean>(false)
@@ -603,7 +612,7 @@ async function handleLogin(): Promise<void> {
     appStore.showSuccess(t('auth.loginSuccess'))
 
     // Redirect to dashboard or intended route
-    const redirectTo = (router.currentRoute.value.query.redirect as string) || '/dashboard'
+    const redirectTo = (router.currentRoute.value.query.redirect as string) || defaultRedirectPath.value
     await router.push(redirectTo)
   } catch (error: unknown) {
     errorMessage.value = extractI18nErrorMessage(error, t, 'auth.errors', t('auth.loginFailed'))
@@ -644,7 +653,7 @@ async function handlePasskeyLogin(): Promise<void> {
     await authStore.loginWithPasskey(proof)
     clearAllAffiliateReferralCodes()
     appStore.showSuccess(t('auth.loginSuccess'))
-    const redirectTo = (router.currentRoute.value.query.redirect as string) || '/dashboard'
+    const redirectTo = (router.currentRoute.value.query.redirect as string) || defaultRedirectPath.value
     await router.push(redirectTo)
   } catch (error: unknown) {
     const fallback = error instanceof DOMException && error.name === 'NotAllowedError'
@@ -713,7 +722,7 @@ async function handle2FAVerify(code: string): Promise<void> {
     appStore.showSuccess(t('auth.loginSuccess'))
 
     // Redirect to dashboard or intended route
-    const redirectTo = (router.currentRoute.value.query.redirect as string) || '/dashboard'
+    const redirectTo = (router.currentRoute.value.query.redirect as string) || defaultRedirectPath.value
     await router.push(redirectTo)
   } catch (error: unknown) {
     const err = error as { message?: string; response?: { data?: { message?: string } } }
