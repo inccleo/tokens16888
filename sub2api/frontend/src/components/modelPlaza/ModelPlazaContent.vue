@@ -48,6 +48,25 @@
         @update:search="searchQuery = $event"
       />
 
+      <!-- 只看收藏切换 -->
+      <div class="flex items-center">
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
+          :class="favoritesOnly
+            ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300'
+            : 'border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-dark-700 dark:text-dark-300 dark:hover:bg-dark-800'"
+          :aria-pressed="favoritesOnly"
+          @click="favoritesOnly = !favoritesOnly"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 20 20" :fill="favoritesOnly ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118L2.05 10.001c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+          </svg>
+          {{ t('modelPlaza.filters.favoritesOnly') }}
+          <span v-if="favoriteCount > 0" class="font-mono text-xs opacity-70">{{ favoriteCount }}</span>
+        </button>
+      </div>
+
       <!-- 分组分节的模型清单(默认按生效倍率升序) -->
       <div v-if="filteredGroups.length > 0" class="space-y-5">
         <PlazaGroupSection v-for="g in filteredGroups" :key="g.id" :group="g" />
@@ -56,7 +75,7 @@
         v-else
         class="rounded-2xl border border-dashed border-gray-300 px-5 py-12 text-center text-sm text-gray-500 dark:border-dark-600 dark:text-dark-400"
       >
-        {{ searchActive ? t('modelPlaza.noSearchResult') : t('modelPlaza.empty') }}
+        {{ favoritesOnly && !searchQuery.trim() ? t('modelPlaza.noFavorites') : searchActive ? t('modelPlaza.noSearchResult') : t('modelPlaza.empty') }}
       </div>
     </template>
   </div>
@@ -72,6 +91,7 @@ import PlazaFilterBar from './PlazaFilterBar.vue'
 import PlazaGroupSection from './PlazaGroupSection.vue'
 import type { ModelPlazaGroup, ModelPlazaResponse } from '@/api/modelPlaza'
 import { useAuthStore } from '@/stores/auth'
+import { useModelFavorites } from '@/composables/useModelFavorites'
 
 const props = defineProps<{
   response: ModelPlazaResponse | null
@@ -89,8 +109,11 @@ const selectedPlatform = ref<string>('all')
 const selectedGroupId = ref<number | 'all'>('all')
 const selectedRate = ref<number | 'all'>('all')
 const searchQuery = ref('')
+const favoritesOnly = ref(false)
 
-const searchActive = computed(() => searchQuery.value.trim() !== '')
+const { isFavorite, favoriteCount } = useModelFavorites()
+
+const searchActive = computed(() => searchQuery.value.trim() !== '' || favoritesOnly.value)
 
 const descriptionHtml = computed(() => {
   const md = props.response?.description?.trim()
@@ -144,6 +167,12 @@ const filteredGroups = computed(() => {
   if (q) {
     groups = groups
       .map((g) => ({ ...g, models: g.models.filter((m) => m.name.toLowerCase().includes(q)) }))
+      .filter((g) => g.models.length > 0)
+  }
+  // 只看收藏:分组内只留已收藏模型。
+  if (favoritesOnly.value) {
+    groups = groups
+      .map((g) => ({ ...g, models: g.models.filter((m) => isFavorite(m.name)) }))
       .filter((g) => g.models.length > 0)
   }
   // 专属倍率会改变生效值,不能只依赖后端按默认倍率的排序。
