@@ -1,6 +1,6 @@
 <template>
-  <!-- Row 1: Core Stats -->
-  <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <!-- Row 1: Core Stats（hideCoreRow 时隐藏——第一屏由 UserDashboardOverview 承载余额/Key/今日） -->
+  <div v-if="!hideCoreRow" class="grid grid-cols-2 gap-4 lg:grid-cols-4">
     <!-- Balance -->
     <div v-if="!isSimple" class="card p-4">
       <div class="flex items-center gap-3">
@@ -246,6 +246,8 @@ const props = defineProps<{
   balance: number
   isSimple: boolean
   platformQuotas?: PlatformQuotaItem[] | null
+  /** 隐藏第一行核心卡（余额/Key/今日请求/今日费用）。第二屏「更多指标」使用，避免与总览重复。 */
+  hideCoreRow?: boolean
 }>()
 const { t } = useI18n()
 
