@@ -225,8 +225,20 @@
   }
 
   /* ============ 卡片样式 ============ */
+  /* 与登录页(AuthLayout)统一的玻璃质感：半透明 + backdrop-blur + 柔和玻璃阴影。
+     控制台所有 .card 随之与登录页一致。需要不透明实心卡时用 .card-solid。 */
   .card {
-    @apply bg-white dark:bg-dark-800/50;
+    @apply bg-white/75 dark:bg-dark-800/60;
+    @apply rounded-2xl;
+    @apply border border-white/30 dark:border-dark-700/60;
+    @apply backdrop-blur-xl;
+    @apply shadow-glass;
+    @apply transition-all duration-300;
+  }
+
+  /* 需要完全不透明背景的场景（如浮层内嵌卡）可用此类回退到实心卡。 */
+  .card-solid {
+    @apply bg-white dark:bg-dark-800;
     @apply rounded-2xl;
     @apply border border-gray-100 dark:border-dark-700/50;
     @apply shadow-card;
