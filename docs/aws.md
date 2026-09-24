@@ -157,6 +157,8 @@ echo YOUR_GITHUB_TOKEN | sudo docker login ghcr.io -u inccleo --password-stdin
 | 访问地址 | https://tokens16888.com 、 https://www.tokens16888.com |
 | 健康检查 | https://tokens16888.com/health |
 | Nginx | `/etc/nginx/sites-available/tokens16888.com` |
+| 证书 | `/etc/letsencrypt/live/tokens16888.com/`（Let's Encrypt，含 `www`，自动续期） |
+| ACME 验证目录 | `/var/www/certbot/.well-known/acme-challenge/`（webroot） |
 | 应用绑定 | `127.0.0.1:8080`（不对外开放） |
 | 服务器目录 | `/opt/tokens16888` |
 | Compose 文件 | `/opt/tokens16888/docker-compose.yml`（来自官方 `deploy/docker-compose.local.yml`） |
@@ -181,7 +183,14 @@ Cloudflare 可以继续用橙色云（已代理）。只保留这两条记录：
 
 不要再挂 `54.149.79.189`、`34.216.117.25` 这些旧 IP，否则会轮询到停车页。
 
-源站 80/443 都已开。Cloudflare SSL/TLS 用 **Full** 即可（不要用 Full (strict)，源站现在是自签证书）。
+源站 80/443 都已开。源站证书已换成 Let's Encrypt（`tokens16888.com` + `www`），Cloudflare SSL/TLS 用 **Full (strict)**。
+
+证书续期走 HTTP-01（webroot `/var/www/certbot`），`certbot.timer` 自动续，续期后 `systemctl reload nginx`。**开橙色云也能续**（Cloudflare 会回源放行 `/.well-known/acme-challenge/`）；但别开「Always Use HTTPS + 源站只留裸 HTTP」这类组合。如果续期失败，先把 Cloudflare 切回灰色云（DNS only）再手动续：
+
+```bash
+sudo certbot renew --cert-name tokens16888.com --force-renewal
+sudo nginx -t && sudo systemctl reload nginx
+```
 
 浏览器打开 `https://tokens16888.com` 或 `https://www.tokens16888.com`。如果还看到 521，硬刷新或清缓存后再试。 `www` 没解析时，先在 Cloudflare 加上面那条 CNAME。
 
@@ -287,7 +296,8 @@ aws lightsail open-instance-public-ports \
 | 命令打到错误区域 | `--region ap-southeast-1` |
 | 网页打不开 | 确认实例 `running`，80 端口已开，DNS 指向 `54.151.248.175`，`sudo docker compose ps` 三个容器都是 healthy |
 | 域名还是停车页 | Cloudflare 同一域名挂了多条 A 记录，删掉旧 IP，只留 `54.151.248.175` |
-| `Error 521 Web server is down` | Cloudflare 在回源 443，源站当时没开 HTTPS。现在已开。SSL 用 Full，不要 Full (strict) |
+| `Error 521 Web server is down` | Cloudflare 回源 443 不通。确认 `sudo docker compose ps` 正常、`sudo nginx -t` 通过、443 已开。源站证书是 Let's Encrypt，SSL 用 Full (strict) |
+| `tokens16888.com` 证书快到期/续期失败 | `sudo certbot certificates`；确认 `/var/www/certbot/.well-known/acme-challenge/` 能被公网访问；必要时切灰色云后 `sudo certbot renew --force-renewal` |
 | `IP:8080` 打不开 | 正常。8080 只绑 `127.0.0.1`，公网已关闭 |
 | `IP:3000` 打不开 | 正常。chatgpt2api 只绑 `127.0.0.1:3000`，公网已关闭 |
 | `image.tokens16888.com` 证书失败 | 确认 Cloudflare 是灰色云（DNS only），A 记录指向 `54.151.248.175` |
