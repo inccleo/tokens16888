@@ -222,6 +222,22 @@ export default {
 
   // Auth
   auth: {
+    brandPanelLabel: '16888 品牌介绍',
+    brandWordmark: 'API 中转服务',
+    brandEyebrow: '模型 API 接入与用量管理',
+    brandHeadline: '一个入口，管理每一次模型调用。',
+    brandDescription: '统一管理 API 密钥、模型接入与用量账单，让每一次调用都清楚可见。',
+    brandFeatureApiTitle: '统一接入',
+    brandFeatureApiDescription: '多个模型，一个 API 入口',
+    brandFeatureUsageTitle: '用量清晰',
+    brandFeatureUsageDescription: '余额、消费与请求记录随时可查',
+    brandFeatureControlTitle: '自助管理',
+    brandFeatureControlDescription: '密钥与账户设置集中维护',
+    brandDiagramInput: 'API 请求',
+    brandDiagramOutput: '模型路由',
+    brandFooter: 'CLEAR ROUTES. CLEAR USAGE.',
+    adminPortalLabel: '管理员入口',
+    userPortalLabel: '用户工作台',
     welcomeBack: '欢迎回来',
     signInToAccount: '登录您的账户以继续',
     signIn: '登录',

@@ -74,7 +74,11 @@ function mountLogin(props: { adminEntry?: boolean } = {}) {
     props,
     global: {
       stubs: {
-        AuthLayout: { template: '<div><slot /><slot name="footer" /></div>' },
+        AuthLayout: {
+          props: ['adminEntry'],
+          template:
+            '<div data-testid="auth-layout" :data-admin-entry="String(adminEntry)"><slot /><slot name="footer" /></div>'
+        },
         DingTalkOAuthSection: true,
         EmailOAuthButtons: true,
         Icon: true,
@@ -121,6 +125,7 @@ describe('LoginView registration entry', () => {
     const wrapper = mountLogin({ adminEntry: true })
     await flushPromises()
 
+    expect(wrapper.find('[data-testid="auth-layout"]').attributes('data-admin-entry')).toBe('true')
     expect(wrapper.text()).toContain('auth.adminConsoleLogin')
     expect(wrapper.text()).toContain('auth.adminConsoleLoginHint')
   })

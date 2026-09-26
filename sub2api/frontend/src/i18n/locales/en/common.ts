@@ -222,6 +222,22 @@ export default {
 
   // Auth
   auth: {
+    brandPanelLabel: '16888 brand introduction',
+    brandWordmark: 'API GATEWAY',
+    brandEyebrow: 'Model API access and usage management',
+    brandHeadline: 'One gateway for every model call.',
+    brandDescription: 'Manage API keys, model access, and usage in one place—with a clear view of every request.',
+    brandFeatureApiTitle: 'One access point',
+    brandFeatureApiDescription: 'Multiple models behind one API gateway',
+    brandFeatureUsageTitle: 'Visible usage',
+    brandFeatureUsageDescription: 'Check balance, spending, and request history',
+    brandFeatureControlTitle: 'Self-service control',
+    brandFeatureControlDescription: 'Manage keys and account settings in one place',
+    brandDiagramInput: 'API REQUEST',
+    brandDiagramOutput: 'MODEL ROUTES',
+    brandFooter: 'CLEAR ROUTES. CLEAR USAGE.',
+    adminPortalLabel: 'ADMINISTRATOR ACCESS',
+    userPortalLabel: 'USER CONSOLE',
     welcomeBack: 'Welcome Back',
     signInToAccount: 'Sign in to your account to continue',
     signIn: 'Sign In',

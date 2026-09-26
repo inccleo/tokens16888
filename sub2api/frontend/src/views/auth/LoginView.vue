@@ -1,8 +1,8 @@
 <template>
-  <AuthLayout>
+  <AuthLayout :admin-entry="isAdminEntry">
     <div class="space-y-6">
       <!-- Title -->
-      <div class="text-center">
+      <div class="text-left">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
           {{ isAdminEntry ? t('auth.adminConsoleLogin') : t('auth.welcomeBack') }}
         </h2>
