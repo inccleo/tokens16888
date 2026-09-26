@@ -20,6 +20,21 @@ export const DashboardIcon = {
     )
 }
 
+export const BookIcon = {
+  render: () =>
+    h(
+      'svg',
+      { fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', 'stroke-width': '1.5' },
+      [
+        h('path', {
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round',
+          d: 'M12 6.75c-1.5-1.125-3.75-1.5-7.5-1.5v13.5c3.75 0 6 .375 7.5 1.5m0-13.5c1.5-1.125 3.75-1.5 7.5-1.5v13.5c-3.75 0-6 .375-7.5 1.5m0-13.5v13.5'
+        })
+      ]
+    )
+}
+
 export const KeyIcon = {
   render: () =>
     h(

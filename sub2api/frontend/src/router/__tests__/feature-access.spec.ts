@@ -26,6 +26,8 @@ const appStore = vi.hoisted(() => ({
     payment_enabled?: boolean
     risk_control_enabled?: boolean
     subscription_enabled?: boolean
+    model_plaza_enabled?: boolean
+    model_plaza_require_auth?: boolean
     custom_menu_items?: []
   },
   fetchPublicSettings: vi.fn(),
@@ -96,7 +98,7 @@ function runGuard(meta: Record<string, unknown>, path: string) {
     {
       path,
       fullPath: path,
-      name: 'FeatureRoute',
+      name: path === '/console/models' ? 'ConsoleModels' : path === '/model-plaza' ? 'ModelPlaza' : 'FeatureRoute',
       params: {},
       meta: { requiresAuth: true, ...meta },
     },
@@ -138,6 +140,30 @@ describe('feature route guard', () => {
     await navigation
     expect(next).toHaveBeenCalledOnce()
     expect(next).toHaveBeenCalledWith()
+  })
+
+  it('loads the model-plaza feature flag for the authenticated console catalog', async () => {
+    appStore.fetchPublicSettings.mockImplementation(async () => {
+      appStore.cachedPublicSettings = { model_plaza_enabled: true }
+      appStore.publicSettingsLoaded = true
+      return appStore.cachedPublicSettings
+    })
+
+    const { navigation, next } = runGuard({}, '/console/models')
+    await navigation
+
+    expect(appStore.fetchPublicSettings).toHaveBeenCalledOnce()
+    expect(next).toHaveBeenCalledWith()
+  })
+
+  it('redirects the console catalog when public settings explicitly disable it', async () => {
+    appStore.publicSettingsLoaded = true
+    appStore.cachedPublicSettings = { model_plaza_enabled: false }
+
+    const { navigation, next } = runGuard({}, '/console/models')
+    await navigation
+
+    expect(next).toHaveBeenCalledWith('/console')
   })
 
   it.each([

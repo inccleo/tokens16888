@@ -56,23 +56,7 @@
           </ul>
         </div>
 
-        <!-- 服务状态 -->
-        <div class="card flex flex-col justify-between p-5">
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('dashboard.serviceStatus') }}</h2>
-            <div class="mt-3 flex items-center gap-2">
-              <span class="h-2.5 w-2.5 rounded-full bg-green-500"></span>
-              <span class="text-sm text-gray-700 dark:text-dark-200">{{ t('dashboard.serviceOperational') }}</span>
-            </div>
-          </div>
-          <RouterLink
-            to="/monitor"
-            class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
-          >
-            {{ t('dashboard.viewServiceStatus') }}
-            <Icon name="arrowRight" size="sm" />
-          </RouterLink>
-        </div>
+        <UserDashboardServiceStatus />
       </div>
 
       <!-- 快速开始 + 最近调用 -->
@@ -121,6 +105,7 @@ import UserDashboardStats from '@/components/user/dashboard/UserDashboardStats.v
 import UserDashboardCharts from '@/components/user/dashboard/UserDashboardCharts.vue'
 import UserDashboardRecentUsage from '@/components/user/dashboard/UserDashboardRecentUsage.vue'
 import UserDashboardQuickStart from '@/components/user/dashboard/UserDashboardQuickStart.vue'
+import UserDashboardServiceStatus from '@/components/user/dashboard/UserDashboardServiceStatus.vue'
 import type { UsageLog, TrendDataPoint, ModelStat, PlatformQuotaItem } from '@/types'
 import { getMyPlatformQuotas } from '@/api/user'
 import { formatDateLocalInput } from '@/utils/format'

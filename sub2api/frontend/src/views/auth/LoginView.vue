@@ -4,10 +4,10 @@
       <!-- Title -->
       <div class="text-center">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ t('auth.welcomeBack') }}
+          {{ isAdminEntry ? t('auth.adminConsoleLogin') : t('auth.welcomeBack') }}
         </h2>
         <p class="mt-2 text-sm text-gray-500 dark:text-dark-400">
-          {{ t('auth.signInToAccount') }}
+          {{ isAdminEntry ? t('auth.adminConsoleLoginHint') : t('auth.signInToAccount') }}
         </p>
       </div>
       <!-- Login Form -->
@@ -262,13 +262,12 @@ const authStore = useAuthStore()
 const appStore = useAppStore()
 
 // adminEntry 由 /admin/login 入口传入（或路由 meta.adminEntry）。
-// 管理员入口登录后默认进入管理员端，用户入口默认进入用户端；
-// 角色不再作为「进哪个前端」的唯一依据，入口决定默认落点。
+// 管理员入口进入管理员端；用户入口（即使是管理员账号）默认进入用户控制台。
 const props = defineProps<{ adminEntry?: boolean }>()
 const isAdminEntry = computed(
-  () => props.adminEntry === true || router.currentRoute.value.meta.adminEntry === true
+  () => props.adminEntry === true || router.currentRoute.value.meta?.adminEntry === true
 )
-const defaultRedirectPath = computed(() => (isAdminEntry.value ? '/admin/dashboard' : '/dashboard'))
+const defaultRedirectPath = computed(() => (isAdminEntry.value ? '/admin/dashboard' : '/console'))
 
 // ==================== State ====================
 

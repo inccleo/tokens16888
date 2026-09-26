@@ -11,6 +11,8 @@ import { describe, expect, it } from 'vitest'
 // 这些守卫断言随之指向新的归属文件。
 const dir = dirname(fileURLToPath(import.meta.url))
 const shellSource = readFileSync(resolve(dir, '../SidebarShell.vue'), 'utf8')
+const adminSidebarSource = readFileSync(resolve(dir, '../AdminSidebar.vue'), 'utf8')
+const userSidebarSource = readFileSync(resolve(dir, '../UserSidebar.vue'), 'utf8')
 const userNavSource = readFileSync(resolve(dir, '../nav/useUserNav.ts'), 'utf8')
 const adminNavSource = readFileSync(resolve(dir, '../nav/useAdminNav.ts'), 'utf8')
 const styleSource = readFileSync(resolve(dir, '../../../style.css'), 'utf8')
@@ -54,6 +56,20 @@ describe('SidebarShell collapsible groups', () => {
     // to the active-route heuristic only when the user has not clicked yet.
     expect(shellSource).toContain('const groupExpandOverrides = ref<Map<string, boolean>>(new Map())')
     expect(shellSource).not.toContain('expandedGroups.value.has(item.path) || isGroupActive(item)')
+  })
+})
+
+describe('用户与管理员 Shell 导航边界', () => {
+  it('管理员导航始终提供进入用户控制台的显式入口', () => {
+    expect(adminSidebarSource).toContain("path: '/console'")
+    expect(adminSidebarSource).toContain("t('nav.userConsole')")
+    expect(adminSidebarSource).toContain('home-path="/admin/dashboard"')
+  })
+
+  it('用户控制台使用自己的根路径，公共 SidebarShell 不按角色切换首页', () => {
+    expect(userSidebarSource).toContain('home-path="/console"')
+    expect(shellSource).not.toContain('useAuthStore')
+    expect(shellSource).not.toContain('authStore.isAdmin')
   })
 })
 

@@ -1,5 +1,5 @@
 <template>
-  <SidebarShell :sections="sections" />
+  <SidebarShell :sections="sections" home-path="/admin/dashboard" />
 </template>
 
 <script setup lang="ts">
@@ -15,6 +15,7 @@ import SidebarShell from './SidebarShell.vue'
 import type { NavSection } from './nav/types'
 import { useAdminNav } from './nav/useAdminNav'
 import { useUserNav } from './nav/useUserNav'
+import { DashboardIcon } from './nav/icons'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -22,7 +23,13 @@ const { adminNavItems, fetchAdminSettings } = useAdminNav()
 const { personalNavItems, refreshBatchImageAccess } = useUserNav()
 
 const sections = computed<NavSection[]>(() => {
-  const list: NavSection[] = [{ items: adminNavItems.value }]
+  const list: NavSection[] = [
+    { items: adminNavItems.value },
+    {
+      title: t('nav.userExperience'),
+      items: [{ path: '/console', label: t('nav.userConsole'), icon: DashboardIcon }],
+    },
+  ]
   if (!authStore.isSimpleMode) {
     list.push({ title: t('nav.myAccount'), items: personalNavItems.value })
   }

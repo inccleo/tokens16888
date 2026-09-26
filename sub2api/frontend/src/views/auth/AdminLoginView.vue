@@ -1,5 +1,5 @@
 <template>
-  <!-- 管理员登录入口：复用 LoginView 表单，adminEntry 使登录后默认进入管理员端。 -->
+  <!-- 管理员登录入口：复用 LoginView 表单，明确标识管理控制台并默认进入管理员端。 -->
   <LoginView :admin-entry="true" />
 </template>
 

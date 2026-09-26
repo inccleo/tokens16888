@@ -81,7 +81,7 @@ function simulateGuard(
       if (authState.backendModeEnabled && !authState.isAdmin) {
         return null
       }
-      return authState.isAdmin ? '/admin/dashboard' : '/dashboard'
+      return toPath === '/admin/login' && authState.isAdmin ? '/admin/dashboard' : '/console'
     }
     if (authState.backendModeEnabled && !authState.isAuthenticated) {
       const allowed = ['/login', '/admin/login', '/key-usage', '/setup', '/payment/result']
@@ -201,14 +201,14 @@ describe('路由守卫逻辑', () => {
       hasPendingAuthSession: false,
     }
 
-    it('访问 /login 重定向到 /dashboard', () => {
+    it('访问 /login 重定向到 /console', () => {
       const redirect = simulateGuard('/login', { requiresAuth: false }, authState)
-      expect(redirect).toBe('/dashboard')
+      expect(redirect).toBe('/console')
     })
 
-    it('访问 /register 重定向到 /dashboard', () => {
+    it('访问 /register 重定向到 /console', () => {
       const redirect = simulateGuard('/register', { requiresAuth: false }, authState)
-      expect(redirect).toBe('/dashboard')
+      expect(redirect).toBe('/console')
     })
 
     it('访问 /dashboard 允许通过', () => {
@@ -216,9 +216,9 @@ describe('路由守卫逻辑', () => {
       expect(redirect).toBeNull()
     })
 
-    it('已登录再访问 /admin/login 重定向到 /dashboard', () => {
+    it('普通用户访问 /admin/login 后回到用户控制台', () => {
       const redirect = simulateGuard('/admin/login', { requiresAuth: false, adminEntry: true }, authState)
-      expect(redirect).toBe('/dashboard')
+      expect(redirect).toBe('/console')
     })
 
     it('访问管理页面被拒绝，重定向到 /dashboard', () => {
@@ -243,9 +243,9 @@ describe('路由守卫逻辑', () => {
       hasPendingAuthSession: false,
     }
 
-    it('访问 /login 重定向到 /admin/dashboard', () => {
+    it('管理员从用户登录入口进入用户控制台', () => {
       const redirect = simulateGuard('/login', { requiresAuth: false }, authState)
-      expect(redirect).toBe('/admin/dashboard')
+      expect(redirect).toBe('/console')
     })
 
     it('已登录再访问 /admin/login 重定向到 /admin/dashboard', () => {
@@ -431,7 +431,7 @@ describe('路由守卫逻辑', () => {
       expect(redirect).toBeNull()
     })
 
-    it('admin: /login redirects to /admin/dashboard', () => {
+    it('admin: /login keeps the user-console entry destination', () => {
       const authState: MockAuthState = {
         isAuthenticated: true,
         isAdmin: true,
@@ -440,7 +440,7 @@ describe('路由守卫逻辑', () => {
         hasPendingAuthSession: false,
       }
       const redirect = simulateGuard('/login', { requiresAuth: false }, authState)
-      expect(redirect).toBe('/admin/dashboard')
+      expect(redirect).toBe('/console')
     })
 
     it('non-admin authenticated: /dashboard redirects to /login', () => {

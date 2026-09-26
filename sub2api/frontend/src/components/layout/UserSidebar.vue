@@ -1,5 +1,5 @@
 <template>
-  <SidebarShell :sections="sections" />
+  <SidebarShell :sections="sections" home-path="/console" />
 </template>
 
 <script setup lang="ts">

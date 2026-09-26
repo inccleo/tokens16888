@@ -8,35 +8,45 @@
 | 仓库 | `inccleo/tokens16888` |
 | 源码目录 | `sub2api/` |
 | 前端目录 | `sub2api/frontend/` |
-| 文档状态 | 开发前规划稿 |
+| 文档状态 | 实施基线（2026-09-26 更新） |
 | 参考产品 | [APIMart 登录页](https://apimart.ai/zh/login) |
 | 目标 | 将现有用户端升级为专业的开发者中转站控制台 |
+
+### 1.1 当前实现进度（工作区快照）
+
+以下状态来自 2026-09-26 对当前源码的核对，表示代码实现进度，不代表已部署到线上。
+
+| 阶段 | 当前状态 | 已落地 | 尚未完成 |
+|---|---|---|---|
+| 阶段 0：现状审计 | 部分完成 | 路由、页面、权限与组件静态盘点已记录在 `docs/phase0-audit.md` | 运行态截图、320/768/1024/1440px 视觉清单 |
+| 阶段 1：Shell、路由与认证 | 部分完成 | 公共/用户/管理员布局和导航分离；管理员可从管理员侧栏或账户菜单进入 `/console`；用户入口以用户控制台为默认落点；模型广场公开路由与控制台路由分开 | 浏览器端管理员/普通用户全流程回归、移动端导航检查 |
+| 阶段 2：用户总览 | 部分完成 | 首页接入真实 `/health` 检查、加载/故障/重试状态；明确它只表示平台 API 可达，不冒充上游模型健康 | 首屏信息与 CTA 梳理、公告/用量等空态统一、响应式视觉回归 |
+| 阶段 3：模型市场与文档 | 部分完成 | `/console/models` 独立受保护；新增 `/console/docs` 快速开始中心；批量图片指南保留原路径 | 模型分类/筛选/详情体验与跨页调用流程完善 |
+| 阶段 4：API Key | 未开始 | 继续复用现有 Key 页面和 API | 简化创建流程、移动端卡片和端点示例收口 |
+| 阶段 5：用量、充值、订单 | 未开始 | 继续复用现有业务页面和支付状态逻辑 | 按本 PRD 做信息层级与全状态视觉回归 |
+| 阶段 6：视觉、移动端与发布 | 未开始 | 布局已收敛为中性底色、低对比纹理和实色内容面板 | 完成主题/断点/无障碍、全量回归与发布验证 |
 
 ## 2. 背景与现状
 
 当前项目基于 Sub2API，已经具备用户账号、API Key、模型调用、用量统计、余额充值、订单和管理员管理能力。
 
-现有前端主要问题：
+前置静态审计中识别的主要问题（其中布局与入口边界已在本轮先行修正，其余仍作为后续工作）：
 
-1. 用户端与管理员端共用 `AppLayout`、`AppSidebar` 和较多视觉组件，产品边界不够清晰。
+1. 前置审计时用户端与管理员端共用 `AppLayout`、`AppSidebar` 和较多视觉组件；本轮已拆分布局与导航，仍需浏览器回归。
 2. 用户首页偏统计后台，第一屏展示较多 Token、RPM、TPM、费用和图表，用户不容易找到“创建 Key、查看模型、充值、复制调用代码”等核心动作。
 3. 当前用户菜单较长，模型、密钥、用量、充值、订单、兑换码、订阅、个人资料等功能缺少清晰分组。
-4. 当前视觉体系包含较多玻璃效果、渐变和多色指标卡，数据层级不够稳定。
-5. 管理员登录后进入管理员端是合理的，但管理员还需要能够明确切换到用户端进行真实用户体验验证。
+4. 前置视觉体系包含较多玻璃效果、渐变和多色指标卡，数据层级不够稳定；本轮已先收敛布局底色和 Header，页面级视觉仍需梳理。
+5. 管理员登录后进入管理员端是合理的，同时需要能够明确切换到用户端进行真实用户体验验证；本轮已加入双向切换入口。
 6. 用户端需要从“通用后台”转向“开发者平台”：模型目录、价格、接口文档、密钥、余额和调用记录应形成连续流程。
 
-当前主要实现位置：
+当前主要实现位置（源码位于仓库内的 `sub2api/` 子目录）：
 
-- `frontend/src/router/index.ts`
-- `frontend/src/components/layout/AppLayout.vue`
-- `frontend/src/components/layout/AppSidebar.vue`
-- `frontend/src/components/layout/AppHeader.vue`
-- `frontend/src/components/layout/AuthLayout.vue`
-- `frontend/src/views/user/DashboardView.vue`
-- `frontend/src/views/user/KeysView.vue`
-- `frontend/src/views/user/UsageView.vue`
-- `frontend/src/views/user/PaymentView.vue`
-- `frontend/src/style.css`
+- `sub2api/frontend/src/router/index.ts`
+- `sub2api/frontend/src/layouts/{PublicLayout,UserLayout,AdminLayout}.vue`
+- `sub2api/frontend/src/components/layout/{UserSidebar,AdminSidebar,AppHeader}.vue`
+- `sub2api/frontend/src/views/auth/LoginView.vue`
+- `sub2api/frontend/src/views/user/{DashboardView,DocsView,KeysView,UsageView,PaymentView}.vue`
+- `sub2api/frontend/src/style.css`
 
 ## 3. 产品定位
 
@@ -82,8 +92,7 @@
 | 模型市场 | `/model-plaza` | 公开浏览模型、能力、价格和状态 |
 | 登录 | `/login` | 用户登录入口 |
 | 注册 | `/register` | 用户注册入口 |
-| 文档 | 外部文档地址或 `/docs` | API 快速开始和 SDK 示例 |
-| 服务状态 | `/status` | 服务可用性、故障和公告 |
+| 文档 | 外部文档地址；控制台文档中心为 `/console/docs` | API 快速开始和 SDK 示例 |
 | 法律页面 | `/legal/:documentId` | 服务条款、隐私政策等 |
 
 ### 5.2 用户控制台
@@ -93,13 +102,14 @@
 | 新路径 | 兼容旧路径 | 页面职责 |
 |---|---|---|
 | `/console` | `/dashboard` | 用户总览 |
-| `/console/models` | `/model-plaza` | 登录后的模型目录 |
+| `/console/models` | 无；`/model-plaza` 仍是公开模型广场 | 登录后的模型目录，使用用户控制台布局；两个路由的鉴权策略互不混用 |
 | `/console/keys` | `/keys` | API Key 管理 |
 | `/console/usage` | `/usage` | 用量、费用和请求记录 |
+| 渠道状态 | `/monitor` | 登录后查看渠道状态与监控；平台 API 连通性由控制台首页单独检查 |
 | `/console/billing` | `/purchase` | 余额、充值、套餐 |
 | `/console/orders` | `/orders` | 订单状态和历史记录 |
 | `/console/redeem` | `/redeem` | 兑换码 |
-| `/console/docs` | `/docs/batch-image` 等 | 调用文档和示例 |
+| `/console/docs` | 无；批量图片指南仍为 `/batch-image` 与 `/docs/batch-image` | 快速开始、API 示例、外部文档入口及专项指南 |
 | `/console/support` | 公告/客服入口 | 支持和问题反馈 |
 | `/console/subscriptions` | `/subscriptions` | 订阅套餐与订阅状态 |
 | `/console/affiliate` | `/affiliate` | 分销、邀请与返利 |
@@ -121,7 +131,7 @@
 - 分销：邀请、返利、转账、记录
 - 系统：`/admin/settings`、`/admin/audit-logs`、备份、插件
 
-管理员端不复用用户导航。管理员可以通过用户菜单中的“查看用户端”进入 `/console`，返回时保留登录状态。
+管理员端不复用用户导航。管理员可从管理员侧栏“用户端”或账户菜单“查看用户端”进入 `/console`，在用户壳层通过账户菜单返回 `/admin/dashboard`；账号和登录态保持不变。
 
 管理员端的具体功能与“好用”要求见第 8 节，重构不得削弱现有管理员能力。
 
@@ -129,11 +139,11 @@
 
 ### 6.1 登录入口
 
-- `/login` 作为用户端登录入口。
+- `/login` 作为用户端登录入口；管理员账号从此入口完成登录后默认进入 `/console`。
 - `/admin/login` 作为管理员端登录入口。
 - `/login?redirect=...` 登录后回到用户目标页面。
 - `/admin/login?redirect=...` 登录后回到管理员目标页面。
-- 管理员账号从用户入口登录时，默认进入用户端；从管理员入口登录时，进入管理员端。
+- 管理员账号从用户入口登录时，默认进入用户端；从管理员入口登录时，进入管理员端。已登录管理员再次打开 `/login` 时仍回到用户端，只有 `/admin/login` 对应管理员入口。
 - 角色只用于权限校验，不再作为唯一的“跳转到哪个前端”的依据。
 
 ### 6.2 安全要求
@@ -153,7 +163,7 @@
 1. 当前可用余额、冻结余额和充值按钮。
 2. API Key 数量、活跃 Key 数量和创建按钮。
 3. 今日请求量、今日费用、成功率或错误率。
-4. 当前服务状态和系统公告。
+4. 平台 API 连通状态和系统公告；平台连通状态不得冒充所有上游模型均健康。
 5. 最近调用记录。
 6. 快速开始：选择模型、创建 Key、复制 Python/cURL 示例。
 
@@ -328,8 +338,8 @@ CTA 层级（与阶段 2 验收对齐，消除“首屏 6 块”与“不超过 
 
 ### 9.1 设计方向
 
-- 深色开发者平台为主，支持浅色模式。
-- 石墨黑、深蓝灰作为基础色。
+- 中性浅色控制台为默认基底，支持深色模式；管理端和用户端各自保持清晰的视觉层级。
+- 石墨、蓝灰作为文字与边框色。
 - 16888 青绿色作为唯一主强调色。
 - 减少紫色、彩虹渐变和多色 KPI 卡片。
 - 使用细边框、低对比面板、轻微网格纹理建立层次。
@@ -416,6 +426,8 @@ frontend/src/
 保留并复用现有多语言体系（`frontend/src/i18n/locales`）：所有新增页面文案必须走 i18n，不硬编码；重构不得导致已支持语言缺失。
 
 ## 11. 分阶段开发计划
+
+阶段当前状态以 §1.1 为准。以下各节定义完整交付范围；“部分完成”不代表该阶段验收通过。
 
 ### 阶段 0：现状审计与基础整理
 

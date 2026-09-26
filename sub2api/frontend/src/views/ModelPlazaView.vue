@@ -1,6 +1,15 @@
 <template>
+  <!-- User console route: the route-level UserLayout provides the shell. -->
+  <ModelPlazaContent
+    v-if="isConsoleRoute"
+    :response="data"
+    :loading="loading"
+    :error="loadFailed"
+    embedded
+  />
+
   <!-- 后台内嵌形态:?embedded=1 且已登录,套完整后台布局 -->
-  <AppLayout v-if="isEmbedded">
+  <AppLayout v-else-if="isEmbedded">
     <ModelPlazaContent :response="data" :loading="loading" :error="loadFailed" embedded />
   </AppLayout>
 
@@ -29,6 +38,7 @@ const authStore = useAuthStore()
 
 // embedded=1 但未登录(如转发的链接)自动降级为独立形态。
 const isEmbedded = computed(() => route.query.embedded === '1' && authStore.isAuthenticated)
+const isConsoleRoute = computed(() => route.name === 'ConsoleModels')
 
 const data = ref<ModelPlazaResponse | null>(null)
 const loading = ref(true)

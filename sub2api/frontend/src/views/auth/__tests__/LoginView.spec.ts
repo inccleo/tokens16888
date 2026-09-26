@@ -33,7 +33,7 @@ const publicSettings = {
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: pushMock,
-    currentRoute: { value: { query: {} } }
+    currentRoute: { value: { query: {}, meta: {} } }
   })
 }))
 
@@ -69,8 +69,9 @@ vi.mock('@/api/auth', () => ({
   startOAuthLogin: vi.fn()
 }))
 
-function mountLogin() {
+function mountLogin(props: { adminEntry?: boolean } = {}) {
   return mount(LoginView, {
+    props,
     global: {
       stubs: {
         AuthLayout: { template: '<div><slot /><slot name="footer" /></div>' },
@@ -114,5 +115,13 @@ describe('LoginView registration entry', () => {
     await flushPromises()
 
     expect(wrapper.text()).not.toContain('auth.signUp')
+  })
+
+  it('uses the explicit admin-console label for the admin entry', async () => {
+    const wrapper = mountLogin({ adminEntry: true })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('auth.adminConsoleLogin')
+    expect(wrapper.text()).toContain('auth.adminConsoleLoginHint')
   })
 })

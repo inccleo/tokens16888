@@ -1,11 +1,5 @@
 <template>
-  <div class="relative min-h-screen bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950" data-layout="admin">
-    <!-- Background Decoration：与登录页统一的青绿光斑 + 网格 -->
-    <div class="pointer-events-none fixed inset-0 overflow-hidden">
-      <div class="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-primary-400/15 blur-3xl"></div>
-      <div class="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-primary-500/10 blur-3xl"></div>
-      <div class="absolute inset-0 bg-[linear-gradient(rgba(20,184,166,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(20,184,166,0.025)_1px,transparent_1px)] bg-[size:64px_64px]"></div>
-    </div>
+  <div class="relative min-h-screen bg-gray-50 dark:bg-dark-950" data-layout="admin">
 
     <!-- Sidebar -->
     <AdminSidebar />
@@ -31,8 +25,7 @@
  * AdminLayout —— 管理员控制台外壳。
  *
  * 阶段 1 基础 Shell：结构等价于原 AppLayout，但角色固定为管理员
- * （onboarding storageKey = 'admin_guide'）。导航仍复用 AppSidebar
- * （其内部按 isAdmin 呈现管理员导航），组件级导航拆分放在后续提交。
+ * （onboarding storageKey = 'admin_guide'）；管理员导航由 AdminSidebar 独立提供。
  */
 import '@/styles/onboarding.css'
 import { computed, onMounted } from 'vue'

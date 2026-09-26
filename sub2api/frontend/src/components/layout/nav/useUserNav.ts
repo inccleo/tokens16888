@@ -16,6 +16,7 @@ import type { NavItem } from './types'
 import { applyFeatureFlags } from './types'
 import {
   DashboardIcon,
+  BookIcon,
   KeyIcon,
   BatchImageIcon,
   ChartIcon,
@@ -27,6 +28,7 @@ import {
   GiftIcon,
   UsersIcon,
   UserIcon,
+  GlobeIcon,
 } from './icons'
 
 export function useUserNav() {
@@ -43,6 +45,7 @@ export function useUserNav() {
   const flagSubscription = makeSidebarFlag(FeatureFlags.subscription)
   const flagAffiliate = makeSidebarFlag(FeatureFlags.affiliate)
   const flagBatchImageAccess = () => canUseBatchImage.value
+  const flagModelPlaza = makeSidebarFlag(FeatureFlags.modelPlaza)
 
   // 购买入口文案随站点计费模式切换：仅充值 → 「充值」，仅订阅 → 「订阅」，否则「充值/订阅」。
   const purchaseNavLabel = computed(() => {
@@ -72,10 +75,12 @@ export function useUserNav() {
   function buildSelfNavItems(withDashboard: boolean): NavItem[] {
     const items: NavItem[] = []
     if (withDashboard) {
-      items.push({ path: '/dashboard', label: t('nav.dashboard'), icon: DashboardIcon })
+      items.push({ path: '/console', label: t('nav.dashboard'), icon: DashboardIcon })
     }
     items.push(
+      { path: '/console/models', label: t('nav.modelPlaza'), icon: GlobeIcon, featureFlag: flagModelPlaza },
       { path: '/keys', label: t('nav.apiKeys'), icon: KeyIcon },
+      { path: '/console/docs', label: t('nav.docs'), icon: BookIcon },
       { path: '/batch-image', label: t('nav.batchImage'), icon: BatchImageIcon, hideInSimpleMode: true, featureFlag: flagBatchImageAccess },
       { path: '/usage', label: t('nav.usage'), icon: ChartIcon, hideInSimpleMode: true },
       { path: '/available-channels', label: t('nav.availableChannels'), icon: ChannelIcon, hideInSimpleMode: true, featureFlag: flagAvailableChannels },

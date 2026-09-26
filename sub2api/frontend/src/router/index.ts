@@ -189,7 +189,6 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/model-plaza',
     name: 'ModelPlaza',
-    alias: '/console/models',
     component: () => import('@/views/ModelPlazaView.vue'),
     meta: {
       requiresAuth: false,
@@ -202,6 +201,19 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     redirect: '/home'
+  },
+  {
+    path: '/console/models',
+    name: 'ConsoleModels',
+    component: () => import('@/views/ModelPlazaView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false,
+      layout: 'user',
+      title: 'Model Catalog',
+      titleKey: 'modelPlaza.title',
+      descriptionKey: 'modelPlaza.description'
+    }
   },
   {
     path: '/dashboard',
@@ -232,9 +244,22 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/console/docs',
+    name: 'ConsoleDocs',
+    component: () => import('@/views/user/DocsView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false,
+      layout: 'user',
+      title: 'Developer Docs',
+      titleKey: 'docsHub.title',
+      descriptionKey: 'docsHub.subtitle'
+    }
+  },
+  {
     path: '/batch-image',
     name: 'BatchImageGuide',
-    alias: ['/docs/batch-image', '/console/docs'],
+    alias: '/docs/batch-image',
     component: () => import('@/views/user/BatchImageGuideView.vue'),
     meta: {
       requiresAuth: true,
@@ -860,6 +885,8 @@ router.beforeEach(async (to, _from, next) => {
   // Check if route requires authentication
   const requiresAuth = to.meta.requiresAuth !== false // Default to true
   const requiresAdmin = to.meta.requiresAdmin === true
+  const isPublicModelPlaza = to.name === 'ModelPlaza'
+  const isConsoleModelCatalog = to.name === 'ConsoleModels'
 
   if (to.path === '/setup') {
     try {
@@ -870,6 +897,35 @@ router.beforeEach(async (to, _from, next) => {
       }
     } catch {
       // If setup status cannot be determined, keep the setup page reachable.
+    }
+  }
+
+  // Public and authenticated model catalogs share a feature flag, but retain
+  // independent auth/layout policies. Load settings before either route branch.
+  if (isPublicModelPlaza || isConsoleModelCatalog) {
+    if (!appStore.publicSettingsLoaded) {
+      try {
+        await appStore.fetchPublicSettings()
+      } catch (error) {
+        console.warn('Failed to load public settings in route guard', error)
+      }
+    }
+    const plazaSettings = appStore.cachedPublicSettings
+    if (appStore.publicSettingsLoaded && plazaSettings?.model_plaza_enabled === false) {
+      next(isConsoleModelCatalog ? '/console' : authStore.isAuthenticated
+        ? authStore.isAdmin ? '/admin/dashboard' : '/console'
+        : '/home')
+      return
+    }
+    if (isPublicModelPlaza && plazaSettings?.model_plaza_require_auth === true && !authStore.isAuthenticated) {
+      next({ path: '/login', query: { redirect: to.fullPath } })
+      return
+    }
+    // Backend mode keeps its existing public-route restriction. The protected
+    // console catalog remains available after authentication.
+    if (isPublicModelPlaza && appStore.backendModeEnabled && authStore.isAuthenticated && !authStore.isAdmin) {
+      next('/login')
+      return
     }
   }
 
@@ -886,42 +942,10 @@ router.beforeEach(async (to, _from, next) => {
         next()
         return
       }
-      // 已登录用户不应停留在登录/注册页：管理员回管理员端，普通用户回用户端。
-      // 注意：这是「已登录再访问登录页」的兜底跳转；真正的「登录动作」落点由
-      // LoginView 依据入口（/login vs /admin/login）决定，角色不再是唯一依据。
-      next(authStore.isAdmin ? '/admin/dashboard' : '/dashboard')
+      // Entry point determines the shell: /login is the user console and
+      // /admin/login is the admin console (when the account has admin access).
+      next(to.path === '/admin/login' && authStore.isAdmin ? '/admin/dashboard' : '/console')
       return
-    }
-    // Model Plaza:公开路由但受「启用开关 + 可选强制登录」双重控制(后端同口径 fail-closed)
-    if (to.path === '/model-plaza') {
-      if (!appStore.publicSettingsLoaded) {
-        try {
-          await appStore.fetchPublicSettings()
-        } catch (error) {
-          console.warn('Failed to load public settings in route guard', error)
-        }
-      }
-      const plazaSettings = appStore.cachedPublicSettings
-      // 仅在设置成功加载且明确为 false 时拦截(瞬时加载失败视为未知,由后端 404 兜底)
-      if (appStore.publicSettingsLoaded && plazaSettings?.model_plaza_enabled === false) {
-        next(
-          authStore.isAuthenticated
-            ? authStore.isAdmin
-              ? '/admin/dashboard'
-              : '/dashboard'
-            : '/home'
-        )
-        return
-      }
-      if (plazaSettings?.model_plaza_require_auth === true && !authStore.isAuthenticated) {
-        next({ path: '/login', query: { redirect: to.fullPath } })
-        return
-      }
-      // Backend mode:登录的非管理员也不可见(匿名由下方公共拦截处理,广场不在白名单)
-      if (appStore.backendModeEnabled && authStore.isAuthenticated && !authStore.isAdmin) {
-        next('/login')
-        return
-      }
     }
     // Backend mode: block public pages for unauthenticated users (except login, key-usage, setup)
     if (appStore.backendModeEnabled && !authStore.isAuthenticated) {
